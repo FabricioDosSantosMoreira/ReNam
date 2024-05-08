@@ -4,6 +4,18 @@ ReNam is a handy renaming tool designed for movies, series, and anime, utilizing
 
 **Disclaimer:** ReNam is currently in its basic stage, and its functionality may vary. I plan to continuously update it, addressing issues and introducing new features. Thank you for your understanding and patience!
 
+
+## Requirements
+
+- Python 3.x
+- Required Python packages:
+  - requests
+  - shutil
+  - scandir
+  - re
+- TMDB API Key
+
+
 ## How to Use
 
 Follow these simple steps to utilize ReNam effectively:
@@ -25,8 +37,9 @@ Follow these simple steps to utilize ReNam effectively:
    - Before initiating any renaming operations, ensure to select the directory path containing the files.
 
 6. **Customize File Formats and Patterns:**
-   - Feel free to customize the supported file formats and renaming patterns in `MidiaHandler` according to your preferences.
+   - Feel free to customize the supported `file_formats` and `patterns` in `MidiaHandler.py` according to your preferences.
 
 
 **Note:** For any assistance or suggestions regarding ReNam, don't hesitate to reach out. Your feedback is highly appreciated!
+
 **Note:** ReNam is an independent project and is not affiliated with TMDB (The Movie Database). Any references to TMDB are solely for the purpose of utilizing their services for metadata retrieval. For inquiries or support related to TMDB, please visit their official website.
