@@ -3,20 +3,20 @@ from wcwidth import wcswidth
 
 from utils.any_utils import assign_distributed_list, ensure_value_parity
 from utils.string_utils import has_non_ascii
-from utils.input_utils import read_int_input
 
 
-def interactive_interface(
+def display_interface(
         contents_pos: List[str], 
         headers_pos: List[str], 
         contents: List[List[Any]], 
         headers: List[str], 
-        input_msg: str, 
         min_interface_size: int, 
-        main_header_id: int = 0, 
-        use_last_col: bool = True
+        use_last_col: bool = False
     ) -> str:
 
+
+    # TODO: - check if this works
+    #       - accept contents, headers as Any and transform to str
     headers_length = len(headers)
     contents_length = len(contents)
     
@@ -34,7 +34,7 @@ def interactive_interface(
         str_size = 8  # Default size of 8 characters.
 
         # Get the maximum length of a content in contents.
-        max_content_length = max(len(content[i]) for content in contents)
+        max_content_length = max(wcswidth(content[i]) for content in contents)
 
         # Add the largest value to 'str_size'.
         if max_content_length > len(headers[i]):
@@ -50,12 +50,12 @@ def interactive_interface(
     # Calculate the necessary size for the last column
     if use_last_col:
         sizes_sum = sum(distributed_str_sizes) - distributed_str_sizes[-1]
-
         if distributed_str_sizes[-1] > max_content_length:
             distributed_str_sizes[-1] -= sizes_sum
+            #distributed_str_sizes[-1] = max_content_length + 9
 
         if distributed_str_sizes[-1] < max_content_length + len(headers[-1]):
-            distributed_str_sizes[-1] = max_content_length + len(headers[-1]) - 8
+            distributed_str_sizes[-1] = max_content_length + len(headers[-1]) + 1 #- 8
 
 
     # Adjust the sizes in 'distributed_str_sizes' to ensure only even sizes, decreases by '1' if odd.
@@ -152,17 +152,6 @@ def interactive_interface(
     print(contents_str, end="")
     print(border_str)
 
-    while True:
-        selection = read_int_input(msg=input_msg)
-        if selection == -1:  # Exception from 'read_int_input'
-            return ''
-
-        # Return a string based on the selected content and 'main_header_id'
-        if len(contents) > (selection - 1) >= 0:  
-            return str(contents[selection - 1][main_header_id])
-        
-        else:
-            print("\nWarning - - -> Selection wasn't valid. Please, Try again.\n")
 
 
 def interface_msg(msg: str, size: int = 0):

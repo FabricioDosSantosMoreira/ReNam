@@ -22,7 +22,9 @@ def categorize_list(list_to_categorize: list[Any], identifier: list[Any] = []) -
             identifier.append(str(n + 1)) # Assign identifiers based on indices starting from 1
 
     for i in range(len(list_to_categorize)): # Iterate over elements of 'list_to_categorize'
+
         list_to_categorize[i].insert(0, identifier[i])
+        
         categorized_list.append(list_to_categorize[i]) # Create sublists pairing identifiers with corresponding elements
 
 

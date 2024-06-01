@@ -6,13 +6,10 @@ class Main():
 
     def __init__(self) -> None:
         self.is_running: bool = True
-
-        self.interface = Interface(self)
         self.configs = ConfigHandler()
 
-
-
-
+        self.interface = Interface(self)
+        
 
 
     def run(self) -> None:

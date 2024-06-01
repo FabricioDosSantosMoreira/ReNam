@@ -2,8 +2,9 @@ from utils.interface_utils import display_interface, interface_msg
 from utils.any_utils import categorize_list
 from handlers.ConfigsHandler import ConfigHandler
 
-from typing import Optional
-from utils.input_utils import read_str_input
+from typing import List, Any, Optional
+from utils.input_utils import read_int_input
+
 
 class Interface():
 
@@ -17,33 +18,29 @@ class Interface():
         self.app.update()
 
     
-    def display_select(self, headers, contents, id: Optional[int]) -> str:
+    def display_select(self, headers: List[Any], contents: List[List[Any]], id: Optional[int] = 0) -> str:
+
+        print("\ndentyro: ", self.configs.min_interface_size)
 
         display_interface(
                 headers=headers,
                 contents=contents,
                 headers_pos=self.configs.headers_pos,
                 contents_pos=self.configs.contents_pos,
-                main_header_id=self.configs.min_interface_size,
+                min_interface_size=self.configs.min_interface_size,
             )
         
         while True:
-            selection = read_int_input(msg=input_msg)
+            selection = read_int_input(msg=self.configs.input_msg)
             if selection == -1:  # Exception from 'read_int_input'
                 return ''
 
             # Return a string based on the selected content and 'main_header_id'
             if len(contents) > (selection - 1) >= 0:  
-                return str(contents[selection - 1][main_header_id])
+                return str(contents[selection - 1][id])
             
             else:
                 print("\nWarning - - -> Selection wasn't valid. Please, Try again.\n")
-
-
-
-
-
-
 
 
     def menu(self) -> None:
@@ -51,28 +48,28 @@ class Interface():
 
             print("\n")
 
-            CONTENTS = categorize_list(["RENAME FILES MENU", "QUIT"])
-            HEADERS = ["OPTIONS", "MENU"]
+            CONTENTS = categorize_list([["RENAME漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字字漢字漢字漢字漢漢字漢字漢字 FILES MENU"], ["QUIT"]])
+            HEADERS = ["OPTIONS", "ME漢字NU"]
 
-            self.display_select(HEADERS, CONTENTS)
-
-            
-                
-
-
-
-
-
-
-
-
+            option = self.display_select(HEADERS, CONTENTS)
 
             match option:
 
-                case 1:
-                    self.rename_files_menu()
-                case 2:
-                    quit()
+                case '1':
+                    print("a")
+                    print("\n", self.configs.min_interface_size)
+                case '2':
+                    self.quit()
+
+            
+            a = input("here: ")
+
+            if a == '1':
+                self.configs.update()
+
+                print("\n", self.configs.min_interface_size)
+
+                self.menu()
 
            
          
