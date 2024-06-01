@@ -1,0 +1,13 @@
+{
+    "interface": {
+        "input_message": "\n- - - - - - - -> Insert an option: ",
+
+        "min_interface_size": 120,
+        "max_string_length": 90,
+        "string_delimiter": "..",
+
+        "contents_pos": ["center", "left"],
+        "headers_pos": ["left", "center"]
+    }
+
+}

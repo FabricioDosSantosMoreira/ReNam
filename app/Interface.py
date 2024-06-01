@@ -1,148 +1,79 @@
-from DirectoryHandler import DirectoryHandler
-from MidiaHandler import MidiaHandler
+from utils.interface_utils import display_interface, interface_msg
+from utils.any_utils import categorize_list
+from handlers.ConfigsHandler import ConfigHandler
 
+from typing import Optional
+from utils.input_utils import read_str_input
 
 class Interface():
-    def __init__(self) -> None:
-        pass
+
+    def __init__(self, app) -> None:
+        self.app = app
+        self.configs: ConfigHandler = app.configs
 
 
-    def select_option(self, msg:str) -> int:
+    def quit(self) -> None:
+        self.app.is_running = False
+        self.app.update()
+
+    
+    def display_select(self, headers, contents, id: Optional[int]) -> str:
+
+        display_interface(
+                headers=headers,
+                contents=contents,
+                headers_pos=self.configs.headers_pos,
+                contents_pos=self.configs.contents_pos,
+                main_header_id=self.configs.min_interface_size,
+            )
+        
         while True:
-            try:
-                option = int(input(f"\n{msg}"))
-                return option
-            except ValueError:
-                print("\nERROR - - -> INVALID OPTION. PLEASE, TRY AGAIN.")
+            selection = read_int_input(msg=input_msg)
+            if selection == -1:  # Exception from 'read_int_input'
+                return ''
 
-
-    def select_from_list(self, list: list[str], selection_header: str) -> str:
-
-        if len(list) == 1:
-            return(list[0])
-        
-        else:
-            selection_header = selection_header.upper()
-            print("\n+-=-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            print(f"|   SELECTION   |         {selection_header}", "|".rjust(106 - len(selection_header))                                                                                           )
-            print("+-=-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
+            # Return a string based on the selected content and 'main_header_id'
+            if len(contents) > (selection - 1) >= 0:  
+                return str(contents[selection - 1][main_header_id])
             
-            for i, object in enumerate(list):
-                print(f"|       {i + 1}       |         {object.upper()}", "|".rjust(106 - len(object)))
-            print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
+            else:
+                print("\nWarning - - -> Selection wasn't valid. Please, Try again.\n")
 
-            while True:
-                selection = self.select_option(f"- - - - - - -> PLEASE SELECT {selection_header} TO CONTINUE: ") - 1
 
-                if len(list) > selection >= 0:
-                    return(list[selection])
-                else:
-                    print("\nERROR - - -> SELECTION WASN'T VALID. PLEASE, TRY AGAIN.")  
-        
+
+
+
+
+
 
     def menu(self) -> None:
         while True:
-            print("\n+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            print("|   OPTIONS   |         ACTIONS                                                                                                     |")
-            print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            print("|      1      |         RENAME FILES MENU                                                                                           |")
-            print("|      2      |         QUIT                                                                                                        |")
-            print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
+
+            print("\n")
+
+            CONTENTS = categorize_list(["RENAME FILES MENU", "QUIT"])
+            HEADERS = ["OPTIONS", "MENU"]
+
+            self.display_select(HEADERS, CONTENTS)
+
             
-            match self.select_option("- - - - - - -> INSERT AN OPTION: "):
+                
+
+
+
+
+
+
+
+
+
+            match option:
+
                 case 1:
                     self.rename_files_menu()
                 case 2:
                     quit()
-                case _:
-                    print("\nERROR - - -> SELECTED OPTION DOESN'T EXISTS. PLEASE, TRY AGAIN.")
 
-
-    def rename_files_menu(self):
-
-        self.Directory_handler = DirectoryHandler()
-        self.Midia_handler = MidiaHandler()
-        
-        while True:
-            
-
-            selected_dir_path = self.Directory_handler.selected_directory_path
-
-            if selected_dir_path:
-                print("\n+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-                print(f"| SELECTED DIRECTORY: {selected_dir_path}", "|".rjust(110 - len(selected_dir_path)))
-                print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            else:
-                print("\n+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            
-            print("|   OPTIONS   |         RENAME MENU                                                                                                 |") 
-            print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
-            print("|      1      |         SELECT DIRECTORY                                                                                            |")
-            print("|      2      |         RENAME FILES                                                                                                |")  
-            print("|      3      |         MAIN MENU                                                                                                   |")
-            print("+-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+")
            
-            match self.select_option("- - - - - - -> INSERT AN OPTION: "):
-                case 1:
+         
 
-                    try:
-                        directory = str(input("\n- - - - - - -> INSERT A DIRECTORY PATH OR NAME TO CONTINUE: "))
-                    except ValueError:
-                        print("\nERROR - - -> ValueError") 
-
-                    paths = self.Directory_handler.get_paths(directory)
-
-                    if paths:  # If paths isn't empty
-                        self.Directory_handler.selected_directory_path = self.select_from_list(paths, "DIRECTORY PATH")
-
-                        print(f"\nSELECTED [{self.Directory_handler.selected_directory_path}] AS DIRECTORY")     
-
-                    else: 
-                        print(f"\nERROR - - -> DIRECTORY PATH [{directory}] WASN'T FOUND.")
-
-                    continue
-                case 2:
-
-                    if selected_dir_path: # If selected_dir_path isn't empty
-                        
-                        self.Midia_handler.set_selected_midia_type(self.select_from_list(self.Midia_handler.midia_type, "MIDIA TYPE"))
-
-                        if self.Midia_handler.selected_midia_type == "tv":
-                            while True:
-                                try:
-                                    midia_name = str(input("\n- - - - - - -> INSERT THE MIDIA NAME: "))
-                                    self.Midia_handler.set_midia_name(midia_name)
-
-                                    midia_season = int(input(f"\n- - - - - - -> INSERT THE SEASON FOR [{midia_name.upper()}]: "))
-                                    self.Midia_handler.set_midia_season(midia_season)
-
-                                    start_from = int(input("\n - - - - - - -> INSERT FROM WHICH EPISODE NUMBER START RENAMING: "))
-                                    self.Midia_handler.set_start_from(start_from)
-
-                                    break
-                                except ValueError:
-                                    print("\nERROR - - -> ValueError. PLEASE, TRY AGAIN.") 
-
-                            self.Midia_handler.set_selected_file_format(self.select_from_list(self.Midia_handler.file_format, "FILE FORMAT"))
-                            self.Midia_handler.set_selected_pattern(self.select_from_list(self.Midia_handler.patterns, "PATTERN"))
-
-                            self.Midia_handler.rename(self.Directory_handler.selected_directory_path, "tv")
-
-                        elif self.Midia_handler.selected_midia_type == "movie":
-                            while True:
-                                try:
-                                    midia_name = str(input("\n- - - - - - -> INSERT THE MIDIA NAME: "))
-                                    self.Midia_handler.set_midia_name(midia_name)
-
-                                    break
-                                except ValueError:
-                                    print("\nERROR - - -> ValueError. PLEASE, TRY AGAIN.") 
-
-                            self.Midia_handler.set_selected_file_format(self.select_from_list(self.Midia_handler.file_format, "FILE FORMAT"))
-                            self.Midia_handler.rename(self.Directory_handler.selected_directory_path, "movie")
-                
-                    continue
-                case 3:
-                    self.menu()
-                case _:
-                    print("\nERROR - - -> SELECTED OPTION DOESN'T EXISTS. PLEASE, TRY AGAIN.")
