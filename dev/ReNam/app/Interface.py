@@ -1,76 +1,70 @@
+from typing import List, Any, Optional
+from time import sleep
+
 from utils.interface_utils import display_interface, interface_msg
 from utils.any_utils import categorize_list
-from handlers.ConfigsHandler import ConfigHandler
-
-from typing import List, Any, Optional
 from utils.input_utils import read_int_input
 
 
 class Interface():
 
     def __init__(self, app) -> None:
-        self.app = app
-        self.configs: ConfigHandler = app.configs
+        from Main import Main
+
+        self.app: Main = app
 
 
-    def quit(self) -> None:
-        self.app.is_running = False
-        self.app.update()
+    def __str__(self) -> str:
+        raise NotImplementedError
+        
+        
+    def menu(self) -> None:
+        while True:
+            print("\n")
 
-    
-    def display_select(self, headers: List[Any], contents: List[List[Any]], id: Optional[int] = 0) -> str:
+            CONTENTS = categorize_list([["RENAME FILES"], ["QUIT"]])
+            HEADERS = ["OPTIONS", "MENU"]
 
-        print("\ndentyro: ", self.configs.min_interface_size)
+            option = self.select_from_display(HEADERS, CONTENTS)
+            match int(option):
 
-        display_interface(
+                case 1:
+                    self.rename_menu()
+
+                case 2:
+                    self.app.quit()
+
+
+    def rename_menu(self) -> None:
+        pass
+
+
+    def select_from_display(
+            self, 
+            headers: List[Any], 
+            contents: List[List[Any]], 
+            *, 
+            id: Optional[int] = 0,
+        ) -> Any:
+
+        while True:
+            sleep(1)
+
+            display_interface(
                 headers=headers,
                 contents=contents,
-                headers_pos=self.configs.headers_pos,
-                contents_pos=self.configs.contents_pos,
-                min_interface_size=self.configs.min_interface_size,
+                headers_pos=self.app.configs.headers_pos,
+                contents_pos=self.app.configs.contents_pos,
+                min_size=self.app.configs.min_interface_size,
             )
-        
-        while True:
-            selection = read_int_input(msg=self.configs.input_msg)
-            if selection == -1:  # Exception from 'read_int_input'
-                return ''
 
-            # Return a string based on the selected content and 'main_header_id'
+            selection = read_int_input(msg=self.app.configs.input_msg)
+
+            if selection == -1:  # Exception from 'read_int_input()'
+                return selection # Return -1
+
+            # Return a string based on the selected content and 'id'
             if len(contents) > (selection - 1) >= 0:  
                 return str(contents[selection - 1][id])
             
-            else:
-                print("\nWarning - - -> Selection wasn't valid. Please, Try again.\n")
-
-
-    def menu(self) -> None:
-        while True:
-
-            print("\n")
-
-            CONTENTS = categorize_list([["RENAME漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字漢字字漢字漢字漢字漢漢字漢字漢字 FILES MENU"], ["QUIT"]])
-            HEADERS = ["OPTIONS", "ME漢字NU"]
-
-            option = self.display_select(HEADERS, CONTENTS)
-
-            match option:
-
-                case '1':
-                    print("a")
-                    print("\n", self.configs.min_interface_size)
-                case '2':
-                    self.quit()
-
-            
-            a = input("here: ")
-
-            if a == '1':
-                self.configs.update()
-
-                print("\n", self.configs.min_interface_size)
-
-                self.menu()
-
-           
-         
-
+            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")

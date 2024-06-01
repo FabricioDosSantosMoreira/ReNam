@@ -10,9 +10,9 @@ def display_interface(
         headers_pos: List[str], 
         contents: List[List[Any]], 
         headers: List[str], 
-        min_interface_size: int, 
-        use_last_col: bool = False
-    ) -> str:
+        min_size: int, 
+        use_last_col: bool = True
+    ) -> None:
 
 
     # TODO: - check if this works
@@ -24,7 +24,7 @@ def display_interface(
     # Create a List based on the size of 'len(headers)', Assigning integers representing lengths.
     # It can either distribute a value evenly or place a specific value at the end of the list
     distributed_str_sizes = assign_distributed_list(
-                                value=min_interface_size, 
+                                value=min_size, 
                                 size=headers_length, 
                                 assign_at_end=use_last_col)
 

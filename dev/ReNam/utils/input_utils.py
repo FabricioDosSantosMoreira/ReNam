@@ -26,14 +26,14 @@ def read_str_input(*, msg: str) -> Union[str, int]:
             return value
 
         except ValueError:
-            print("ValueError - - -> Invalid input. Please, try again.\n")
+            print("\nValueError - - -> Invalid input. Please, try again.\n")
 
         except KeyboardInterrupt:
-            print("KeyboardInterrupt - - -> Program interrupted by user.\n")
+            print("\nKeyboardInterrupt - - -> Program interrupted by user.\n")
             return -1
         
         except Exception as e:
-            print(f"Exception - - -> An error occurred: {e}\n")
+            print(f"\nException - - -> An error occurred: {e}\n")
             return -1
 
 
@@ -58,13 +58,13 @@ def read_int_input(*, msg: str) -> Union[str, int]:
             return value
 
         except ValueError:
-            print("ValueError - - -> Invalid input. Please, try again.\n")
+            print("\nValueError - - -> Invalid input. Please, try again.\n")
 
         except KeyboardInterrupt:
-            print("KeyboardInterrupt - - -> Program interrupted by user.\n")
+            print("\nKeyboardInterrupt - - -> Program interrupted by user.\n")
             return -1
         
         except Exception as e:
-            print(f"Exception - - -> An error occurred: {e}\n")
+            print(f"\nException - - -> An error occurred: {e}\n")
             return -1
             
