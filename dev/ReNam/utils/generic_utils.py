@@ -1,8 +1,7 @@
-from typing import Any
+from typing import List, Any
 
 
-
-def categorize_list(list_to_categorize: list[Any], identifier: list[Any] = []) -> list[list[Any]]:
+def categorize_contents(list_to_categorize: list[Any], identifier: list[Any] = []) -> list[list[Any]]:
     """
     Categorizes elements of a list into sublists with identifiers.
     
@@ -29,17 +28,6 @@ def categorize_list(list_to_categorize: list[Any], identifier: list[Any] = []) -
 
 
     return categorized_list 
-
-
-# def categorize_list(list_to_categorize: list[Any]) -> list[list[Any]]:
-#     categorized_list: list[list[Any]] = []
-
-
-
-#     for i in range(len(list_to_categorize)):
-#         categorized_list.append([str(i + 1), list_to_categorize[i]])
-
-#     return categorized_list
 
 
 def ensure_value_parity(value: int, *, target_parity: str = None, decrease: bool = False) -> int:

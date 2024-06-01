@@ -38,4 +38,5 @@ def has_non_ascii(string: str) -> bool:
     for char in string:
         if ord(char) > 127:
             return True
+        
     return False

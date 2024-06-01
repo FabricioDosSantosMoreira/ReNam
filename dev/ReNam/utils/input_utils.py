@@ -1,7 +1,6 @@
 from typing import Union
 
-
-def read_str_input(*, msg: str) -> Union[str, int]:
+def read_str(*, msg: str) -> Union[str, int]:
     """
     Prompts the user for a string input, ensuring the input is valid and non-empty.
 
@@ -37,7 +36,7 @@ def read_str_input(*, msg: str) -> Union[str, int]:
             return -1
 
 
-def read_int_input(*, msg: str) -> Union[str, int]:
+def read_int(*, msg: str) -> Union[str, int]:
     """
     Prompts the user for a integer input, ensuring the input is valid.
 
@@ -67,4 +66,3 @@ def read_int_input(*, msg: str) -> Union[str, int]:
         except Exception as e:
             print(f"\nException - - -> An error occurred: {e}\n")
             return -1
-            

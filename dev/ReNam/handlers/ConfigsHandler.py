@@ -23,7 +23,7 @@ class ConfigHandler():
 
 
     def load_configs(self) -> None:
-        json_path = Path('ReNam/dev/ReNam/app/configs.json')
+        json_path = Path('./dev/ReNam/app/configs.json')
         try:
 
             with open(json_path, 'r', encoding='utf-8') as configs_file:
