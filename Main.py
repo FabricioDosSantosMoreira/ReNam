@@ -12,9 +12,6 @@ class Main():
 
 
 
-
-
-
     def run(self) -> None:
         while self.is_running:
             self.interface.menu()
