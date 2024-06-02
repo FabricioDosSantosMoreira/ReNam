@@ -1,4 +1,4 @@
-from typing import Optional, List, Any, AnyStr
+from typing import Optional, Literal, List, Any, AnyStr
 
 
 def categorize_contents(
@@ -6,61 +6,72 @@ def categorize_contents(
         identifiers: Optional[List[str]] = None
 
     ) -> List[List[str]]:
+    """
+    Categorize a list of contents by assigning an identifier to each content item.
+    
+    Args:
+        contents (List[str]): A list of strings representing the content to be categorized.
+        identifiers (Optional[List[str]]): A list of strings representing identifiers for each content item.
+                                           If not provided, identifiers will be generated as incremental numbers
+                                           starting from 1.
+    
+    Returns:
+        List[List[str]]: A list of lists, where each inner list contains an identifier and the corresponding content.
+                        The format is [[identifier1, content1], [identifier2, content2], ...].
+    """
 
     # If 'identifiers' isn't provided.
     if not identifiers:
 
         identifiers = []
         for n in range(1, len(contents) + 1):
-            # Assign 'identifiers' based on 'contents' indices starting from 1
+            # Assign default 'identifiers' based on the indices of 'contents', starting from 1
             identifiers.append(str(n))
         
-        
-    categorized_contents: List[List[str]] = []
+
+    # Initialize an empty list to store the categorized contents.
+    categorized_contents: List = []
     for i, content in enumerate(contents): 
 
+        # Append a list containing the identifier and the content.
         categorized_contents.append([identifiers[i], str(content)])
+
 
     return categorized_contents 
 
 
+def match_parity(
+        *,
+        value: int, 
+        target_parity: Literal["even", "odd"],
+        decrease: Optional[bool] = False,
+    ) -> int:
+    """
+    Adjusts an integer to match a specified parity (even or odd).
 
+    Parameters:
+    value (int): The integer value to be adjusted.
+    target_parity (Literal["even", "odd"]): The desired parity of the result.
+    decrease (Optional[bool]): If True and adjustment is needed, decrease the value by 1 
+                               to achieve the desired parity. If False or not specified, 
+                               increase the value by 1 to achieve the desired parity.
 
+    Returns:
+    int: The adjusted integer with the specified parity.
+    """
 
-    # for i in range(len(list_to_categorize)): # Iterate over elements of 'list_to_categorize'
-
-    #     list_to_categorize[i].insert(0, identifier[i])
-        
-    #     categorized_list.append(list_to_categorize[i]) # Create sublists pairing identifiers with corresponding elements
-
-
-    # return categorized_list 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def ensure_value_parity(value: int, *, target_parity: str = None, decrease: bool = False) -> int:
+    # Determine the current parity of 'value'.
     current_parity = "even" if value % 2 == 0 else "odd"
 
+    # If the current parity does not match the target parity, adjust the value.
     if current_parity != target_parity:
         if decrease:
-            return value - 1
-        else:
-            return value + 1
+            return value - 1  # Decrease the value by 1 to change its parity.
+        
+        return value + 1  # Increase the value by 1 to change its parity.
 
-    return value  # 'value' already has the desired parity
-
+    
+    return value  # 'value' already has the desired parity.
 
 
 def assign_distributed_list(value: int, size: int, assign_at_end: bool = False) -> list[int]:
