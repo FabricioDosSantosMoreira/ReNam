@@ -1,9 +1,7 @@
-from typing import Optional, List, Any
-from time import sleep
+from typing import Optional, Dict, List, Any
 
 
 from utils.generic_utils import categorize_contents
-from utils.input_utils import read_int, read_str
 
 
 class Interface():
@@ -12,23 +10,62 @@ class Interface():
         from Main import Main
 
         self.app: Main = app
-        
+
+
+    def update(self) -> None:
+        self.app.update()
+                
         
     def menu(self) -> None:
         while True:
             print("\n")
 
-            CONTENTS = categorize_contents([["Go to ReNam"], ["Quit"]])
             HEADERS = ["OPTIONS", "MENU"]
+            CONTENTS = categorize_contents(["RENAM", "CONFIGS", "QUIT"])
+           
+            option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
 
-            option = self.select_from_display(HEADERS, CONTENTS)
             match int(option):
-
                 case 1:
                     self.rename_menu()
 
                 case 2:
+                    self.configs_menu()
+
+                case 3:
                     self.app.quit()
+
+
+    def configs_menu(self) -> None:
+        print("\n")
+
+        HEADERS = ["CONFIG", "VALUE"]
+        CONTENTS = categorize_contents(
+            contents=[
+                str(self.app.configs.input_msg).strip("\n"),
+                str(self.app.configs.min_interface_size), 
+                str(self.app.configs.max_string_length),
+                str(self.app.configs.string_delimiter),
+                str(self.app.configs.headers_pos),
+                str(self.app.configs.contents_pos),
+            ], 
+            identifiers=[
+                "input_message",
+                "min_interface_size", 
+                "max_string_length",
+                "sring_delimiter", 
+                "headers_pos",
+                "contents_pos",
+            ]
+        )
+
+        print(HEADERS)
+        print(CONTENTS)
+
+        self.app.interface_handler.display_interface(HEADERS, CONTENTS)
+
+        self.menu()        
+       
 
 
     def rename_menu(self) -> None:
@@ -39,33 +76,3 @@ class Interface():
 
 
 
-
-    def select_from_display(
-            self, 
-            headers: List[Any], 
-            contents: List[List[Any]], 
-            *, 
-            id: Optional[int] = 0,
-        ) -> Any:
-
-        while True:
-            sleep(1)
-
-            display_interface(
-                headers=headers,
-                contents=contents,
-                headers_pos=self.app.configs.headers_pos,
-                contents_pos=self.app.configs.contents_pos,
-                min_size=self.app.configs.min_interface_size,
-            )
-
-            selection = read_int(msg=self.app.configs.input_msg)
-
-            if selection == -1:  # Exception from 'read_int_input()'
-                return selection # Return -1
-
-            # Return a string based on the selected content and 'id'
-            if len(contents) > (selection - 1) >= 0:  
-                return str(contents[selection - 1][id])
-            
-            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")

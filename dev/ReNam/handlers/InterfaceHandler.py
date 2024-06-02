@@ -1,10 +1,11 @@
 from typing import Optional, Dict, List, Any
 from wcwidth import wcswidth
+from time import sleep
 
 
-from dev.ReNam.utils.generic_utils import assign_distributed_list, ensure_value_parity
+from utils.generic_utils import ensure_value_parity, assign_distributed_list
 from utils.string_utils import has_non_ascii
-
+from utils.input_utils import read_int, read_str
 
 class InterfaceHandler():
 
@@ -34,16 +35,21 @@ class InterfaceHandler():
     
     def display_interface(
             self, 
+            headers: List[str],
             contents: List[List[Any]], 
-            headers: List[str], 
             *, 
             use_last_col: Optional[bool] = True,
     ) -> None:
         
+
+
         headers_pos = self.headers_pos
         contents_pos = self.contents_pos
         min_size = self.min_interface_size
 
+
+        print(min_size)
+        input()
 
         # TODO: - check if this works
         #       - accept contents, headers as Any and transform to str
@@ -207,6 +213,35 @@ class InterfaceHandler():
 
         print(border_str)
         print(f"|   {msg.ljust(size - remaining - 2)}" + "|")
+
+
+    def select_from_display(
+            self, 
+            headers: List[Any], 
+            contents: List[List[Any]], 
+            *, 
+            id: Optional[int] = 0,
+        ) -> Any:
+
+        while True:
+            sleep(1)
+
+            self.display_interface(
+                headers=headers,
+                contents=contents,
+            )
+
+            selection = read_int(msg=self.app.configs.input_msg)
+
+            if selection == -1:  # Exception from 'read_int_input()'
+                return selection # Return -1
+
+            # Return a string based on the selected content and 'id'
+            if len(contents) > (selection - 1) >= 0:  
+                return str(contents[selection - 1][id])
+            
+            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")
+    
 
 
 

@@ -8,13 +8,19 @@ class Main():
     def __init__(self) -> None:
         self.is_running: bool = True
         
-        self.configs = ConfigHandler()
+        self.on_init()
         
 
-    def om_init(self) -> None:
-        self.interface = Interface(self)
+    def on_init(self) -> None:
+
+        # Handlers
+        self.configs = ConfigHandler(self)
         self.interface_handler = InterfaceHandler(self)
 
+
+        # Interface
+        self.interface = Interface(self)
+        
 
     def run(self) -> None:
         while self.is_running:

@@ -6,7 +6,10 @@ from pathlib import Path
 
 class ConfigHandler():
 
-    def __init__(self) -> None:
+    def __init__(self, app) -> None:
+        from Main import Main
+        self.app = app
+
         self.configs: Dict 
 
         # -=-=-=-=-=-= Interface =-=-=-=-=-=-

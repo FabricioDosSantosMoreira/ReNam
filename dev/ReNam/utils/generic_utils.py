@@ -1,33 +1,53 @@
-from typing import List, Any
+from typing import Optional, List, Any, AnyStr
 
 
-def categorize_contents(list_to_categorize: list[Any], identifier: list[Any] = []) -> list[list[Any]]:
-    """
-    Categorizes elements of a list into sublists with identifiers.
-    
-    Args:
-        list_to_categorize (List[Any]): The list to categorize.
-        identifier (List[str], optional): List of identifiers for each element. If not provided, 
-                        elements will be identified by their indices, starting from 1.
-    
-    Returns:
-        List[List[Any]]: A list of sublists where each sublist contains an identifier and an element from the original list.
-    """
-    categorized_list: list[list[Any]] = []
+def categorize_contents(
+        contents: List[str], 
+        identifiers: Optional[List[str]] = None
 
-    if not identifier: # If 'identifier' isn't provided. Iterate over the elements of 'list_to_categorize'
-        identifier = []
-        for n in range(len(list_to_categorize)):
-            identifier.append(str(n + 1)) # Assign identifiers based on indices starting from 1
+    ) -> List[List[str]]:
 
-    for i in range(len(list_to_categorize)): # Iterate over elements of 'list_to_categorize'
+    # If 'identifiers' isn't provided.
+    if not identifiers:
 
-        list_to_categorize[i].insert(0, identifier[i])
+        identifiers = []
+        for n in range(1, len(contents) + 1):
+            # Assign 'identifiers' based on 'contents' indices starting from 1
+            identifiers.append(str(n))
         
-        categorized_list.append(list_to_categorize[i]) # Create sublists pairing identifiers with corresponding elements
+        
+    categorized_contents: List[List[str]] = []
+    for i, content in enumerate(contents): 
+
+        categorized_contents.append([identifiers[i], str(content)])
+
+    return categorized_contents 
 
 
-    return categorized_list 
+
+
+
+    # for i in range(len(list_to_categorize)): # Iterate over elements of 'list_to_categorize'
+
+    #     list_to_categorize[i].insert(0, identifier[i])
+        
+    #     categorized_list.append(list_to_categorize[i]) # Create sublists pairing identifiers with corresponding elements
+
+
+    # return categorized_list 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def ensure_value_parity(value: int, *, target_parity: str = None, decrease: bool = False) -> int:
@@ -42,8 +62,9 @@ def ensure_value_parity(value: int, *, target_parity: str = None, decrease: bool
     return value  # 'value' already has the desired parity
 
 
+
 def assign_distributed_list(value: int, size: int, assign_at_end: bool = False) -> list[int]:
-    
+
     # If 'value' is to be placed at the last index
     if assign_at_end:
         distributed_list = [0] * size  # Initialize 'distributed_list' with zeros
