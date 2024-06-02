@@ -8,7 +8,7 @@ class ConfigHandler():
 
     def __init__(self, app) -> None:
         from Main import Main
-        self.app = app
+        self.app: Main = app
 
         self.configs: Dict 
 

@@ -3,7 +3,7 @@ from wcwidth import wcswidth
 from time import sleep
 
 
-from utils.generic_utils import ensure_value_parity, assign_distributed_list
+from utils.generic_utils import match_parity, evenly_assign_value_to_list
 from utils.string_utils import has_non_ascii
 from utils.input_utils import read_int, read_str
 
@@ -47,10 +47,6 @@ class InterfaceHandler():
         contents_pos = self.contents_pos
         min_size = self.min_interface_size
 
-
-        print(min_size)
-        input()
-
         # TODO: - check if this works
         #       - accept contents, headers as Any and transform to str
         headers_length = len(headers)
@@ -59,7 +55,7 @@ class InterfaceHandler():
         
         # Create a List based on the size of 'len(headers)', Assigning integers representing lengths.
         # It can either distribute a value evenly or place a specific value at the end of the list
-        distributed_str_sizes = assign_distributed_list(
+        distributed_str_sizes = evenly_assign_value_to_list(
                                     value=min_size, 
                                     size=headers_length, 
                                     assign_at_end=use_last_col)
@@ -82,6 +78,8 @@ class InterfaceHandler():
             if distributed_str_sizes[i] < str_size:
                 distributed_str_sizes[i] = str_size
 
+        print(distributed_str_sizes)
+
 
         # Calculate the necessary size for the last column
         if use_last_col:
@@ -96,7 +94,11 @@ class InterfaceHandler():
 
         # Adjust the sizes in 'distributed_str_sizes' to ensure only even sizes, decreases by '1' if odd.
         for i in range(len(distributed_str_sizes)):
-            distributed_str_sizes[i] = ensure_value_parity(distributed_str_sizes[i], target_parity="even", decrease=True)
+            # TODO: check if this works
+            if sum(distributed_str_sizes) == self.min_interface_size:
+                continue
+            else:
+                distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=True)
 
 
         # Build 'border_str'.
@@ -186,6 +188,37 @@ class InterfaceHandler():
         print(border_str)
         print(contents_str, end="")
         print(border_str)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def display_interface_msg(self, msg: str, size: int = 0) -> None:
             

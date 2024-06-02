@@ -6,8 +6,8 @@
         "max_string_length": 90,
         "string_delimiter": "..",
 
-        "contents_pos": ["center", "left"],
-        "headers_pos": ["center", "left"]
+        "contents_pos": ["left", "left"],
+        "headers_pos": ["left", "left"]
     }
     
 }

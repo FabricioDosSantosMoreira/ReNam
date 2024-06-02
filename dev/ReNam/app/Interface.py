@@ -21,8 +21,12 @@ class Interface():
             print("\n")
 
             HEADERS = ["OPTIONS", "MENU"]
-            CONTENTS = categorize_contents(["RENAM", "CONFIGS", "QUIT"])
+            CONTENTS = categorize_contents(
+                contents=["RENAM", "CONFIGS", "QUIT"]
+            )
            
+
+
             option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
 
             match int(option):
@@ -59,8 +63,6 @@ class Interface():
             ]
         )
 
-        print(HEADERS)
-        print(CONTENTS)
 
         self.app.interface_handler.display_interface(HEADERS, CONTENTS)
 

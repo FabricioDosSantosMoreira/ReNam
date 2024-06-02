@@ -9,3 +9,4 @@ print(SRC_PATH)
 from dev.ReNam.utils.string_utils import *
 from dev.ReNam.utils.generic_utils import *
 
+print(len("+-=-=-=-=-=-=-=-=-=-=-=-=-+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-+"))
