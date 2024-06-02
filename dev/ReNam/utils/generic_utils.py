@@ -2,6 +2,7 @@ from typing import Optional, Literal, List, Any, AnyStr
 
 
 def categorize_contents(
+        *,
         contents: List[str], 
         identifiers: Optional[List[str]] = None
 
@@ -45,6 +46,7 @@ def match_parity(
         value: int, 
         target_parity: Literal["even", "odd"],
         decrease: Optional[bool] = False,
+
     ) -> int:
     """
     Adjusts an integer to match a specified parity (even or odd).
@@ -63,6 +65,7 @@ def match_parity(
     # Determine the current parity of 'value'.
     current_parity = "even" if value % 2 == 0 else "odd"
 
+
     # If the current parity does not match the target parity, adjust the value.
     if current_parity != target_parity:
         if decrease:
@@ -74,16 +77,36 @@ def match_parity(
     return value  # 'value' already has the desired parity.
 
 
-def assign_distributed_list(value: int, size: int, assign_at_end: bool = False) -> list[int]:
+def evenly_assign_value_to_list(
+        *,
+        value: int, 
+        size: int, 
+        assign_at_end: Optional[bool] = False
+    
+    ) -> List[int]:
+    """
+    Generate a list where a specified value is evenly distributed among its elements.
 
-    # If 'value' is to be placed at the last index
+    Args:
+        value (int): The value to be distributed among the list elements.
+        size (int): The size of the list.
+        assign_at_end (bool, optional): If True, the value is assigned at the end of the list. 
+            If False, the value is evenly distributed among the list elements. Defaults to False.
+
+    Returns:
+        List[int]: A list where the value is evenly distributed or assigned at the end.
+    """
+
+    # If 'value' is to be assigned at the end.
     if assign_at_end:
-        distributed_list = [0] * size  # Initialize 'distributed_list' with zeros
-        distributed_list[-1] = value   # Assign the value to the last index
+        evenly_list = [0] * size  # Initialize 'evenly_list' with zeros.
+        evenly_list[-1] = value   # Assign 'value' to the last index.
 
-    # If 'value' is to be distributed evenly across the list
+
+    # If 'value' is to be evenly assigned to list
     else:
-        distributed_value = value // size  # Calculate the value to be distributed
-        distributed_list = [distributed_value] * size  # Assign list with 'distributed_value'
+        evenly_value = value // size  # Calculate the value to be distributed
+        evenly_list = [evenly_value] * size  # Assign 'evenly_value' to the list
 
-    return distributed_list 
+
+    return evenly_list 
