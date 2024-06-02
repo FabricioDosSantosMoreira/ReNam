@@ -40,27 +40,38 @@ def reduce_string_length(
     return delimiter + string[-length:]
 
 
-def reduce_list_of_str_length(
-        list_of_strings: List[str], 
-        *, 
-        length: int = 30, 
-        delimiter: str = "", 
-        end_cut: bool = True,
-        ) -> list[str]:
+def reduce_strings_length(
+        *,
+        strings: List[str], 
+        length: int, 
+        delimiter: Optional[str], 
+        end_cut: Optional[bool] = True,
 
-    for i, string in enumerate(list_of_strings):
-        list_of_strings[i] = reduce_str_length(string, length=length, delimiter=delimiter, end_cut=end_cut)
+    ) -> List[str]:
+    """
+    Reduces the length of the given list of strings to the specified length.
 
-    return list_of_strings
+    Args:
+        strings (List[str]): The list of strings to be reduced.
+        length (Optional[int]): The desired maximum length of the strings after reduction.
+        delimiter (Optional[str]): The delimiter to add between the reduced string and the omitted part.
+        end_cut (Optional[bool]): If True, the reduction is done from the end of the string; 
+            otherwise, it's done from the beginning. Defaults to True.
+
+    Returns:
+        List[str]: 
+            The list of reduced strings.
+    """
+
+    for i, string in enumerate(strings):
+        strings[i] = reduce_string_length(
+                        string=string, 
+                        length=length, 
+                        delimiter=delimiter, 
+                        end_cut=end_cut)
 
 
-
-
-
-
-
-
-
+    return strings
 
 
 def has_non_ascii(string: str) -> Tuple[bool, int]:

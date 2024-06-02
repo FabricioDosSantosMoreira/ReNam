@@ -90,7 +90,7 @@ def evenly_assign_value_to_list(
     Args:
         value (int): The value to be distributed among the list elements.
         size (int): The size of the list.
-        assign_at_end (bool, optional): If True, the value is assigned at the end of the list. 
+        assign_at_end (Optional[bool]): If True, the value is assigned at the end of the list. 
             If False, the value is evenly distributed among the list elements. Defaults to False.
 
     Returns:
