@@ -1,5 +1,6 @@
 from typing import Union
 
+
 def read_str(*, msg: str) -> Union[str, int]:
     """
     Prompts the user for a string input, ensuring the input is valid and non-empty.
@@ -14,6 +15,7 @@ def read_str(*, msg: str) -> Union[str, int]:
     Raises:
         None. All exceptions are handled within the function.
     """
+    
     while True:
         
         try:
@@ -50,6 +52,7 @@ def read_int(*, msg: str) -> Union[str, int]:
     Raises:
         None. All exceptions are handled within the function.
     """
+
     while True:
 
         try:

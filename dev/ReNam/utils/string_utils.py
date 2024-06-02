@@ -1,4 +1,4 @@
-from typing import List
+from typing import Tuple, List, Any, AnyStr
 
 def reduce_str_length(
         string: str, 
@@ -7,6 +7,7 @@ def reduce_str_length(
         delimiter: str = '', 
         end_cut: bool = True,
         ) -> str:
+
 
     # Is 'length' greater or equal to string length? If so return the string.
     if length >= len(string):  
@@ -34,9 +35,28 @@ def reduce_list_of_str_length(
     return list_of_strings
 
 
-def has_non_ascii(string: str) -> bool:
-    for char in string:
+def has_non_ascii(string: str) -> Tuple[bool, int]:
+    """
+    Check if a string contains non-ASCII characters.
+
+    Args:
+        string (str): The string to be checked.
+
+    Returns:
+        Tuple[bool, int]: 
+            - If False, returns a tuple containing False and -1, indicating the string is entirely ASCII.
+            - If True, returns a tuple containing True and the index of the first non-ASCII character found.
+    """
+
+    # If the string is entirely ASCII, return False.
+    if string.isascii(): 
+        return False, -1
+    
+    for i, char in enumerate(string):
+        # Check if the ordinal value of the character is greater than 127,
+        # indicating it's a non-ASCII character.
         if ord(char) > 127:
-            return True
+            return True, i
         
-    return False
+        
+    return False, -1
