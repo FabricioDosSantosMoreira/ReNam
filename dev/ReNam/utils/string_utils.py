@@ -5,7 +5,7 @@ def reduce_string_length(
         *,
         string: str, 
         length: int, 
-        delimiter: Optional[str], 
+        delimiter: Optional[str] = '', 
         end_cut: Optional[bool] = True,
     
     ) -> str:
@@ -44,7 +44,7 @@ def reduce_strings_length(
         *,
         strings: List[str], 
         length: int, 
-        delimiter: Optional[str], 
+        delimiter: Optional[str] = '', 
         end_cut: Optional[bool] = True,
 
     ) -> List[str]:
