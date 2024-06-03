@@ -42,6 +42,11 @@ class DirectoryHandler():
 
         self.selected_path = configs.selected_path
 
+        if not self.drives:
+            self.drives = self.get_drives()
+
+        print("DRIVES = ", self.drives)
+
 
     @staticmethod
     def get_drives() -> list[Path]:
@@ -132,7 +137,7 @@ class DirectoryHandler():
                     search_results.remove(path)
 
                 break
-
+        
         return search_results
 
 

@@ -1,6 +1,5 @@
-from typing import Optional, Dict, List, Any
-
 from utils.generic_utils import categorize_contents
+from utils.input_utils import read_str
 
 
 class Interface():
@@ -53,9 +52,44 @@ class Interface():
             option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
 
             match int(option):
-                case 1: 
-                    print("aa")
 
+                case 1: 
+                    from pathlib import Path
+                    _temp = read_str(msg="\n Insert full path or directory name: ")
+                    if _temp == -1:
+                        print("continue")
+                        continue
+                
+                    try:
+                        path = Path(_temp)
+                        search = self.app.directory_handler.search_drives(path=path)
+                        
+                        str_search_list = []
+                        for i in range(len(search)):
+                            print(str(search[i]))
+                            str_search_list.append(str(search[i]))
+
+                        print(str_search_list, "\n\n\n")
+                        if str_search_list:
+
+                            HEADERS = ["OPTIONS", "PATHS"]
+                            CONTENTS = categorize_contents(
+                                contents=str_search_list
+                            )
+
+                        option = int(self.app.interface_handler.select_from_display(HEADERS, CONTENTS))
+
+                        dir = str_search_list[option - 1]
+
+                        self.app.interface_handler.display_interface_msg(f"{dir}", self.app.configs.min_interface_size)
+
+
+                    except Exception as e:
+                        raise e
+                        print(f"EXCEPTION {e}")
+
+
+                    
                 case 2:
                     self.menu()
 

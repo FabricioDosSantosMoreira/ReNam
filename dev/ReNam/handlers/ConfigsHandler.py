@@ -77,6 +77,7 @@ class ConfigHandler():
                 if len(_temp) == 0:
                     self.excluded_paths = []
                 else:
+                    self.excluded_paths = []
                     for i in range(len(_temp)):
                         self.excluded_paths.append(Path(_temp[i]))
 
@@ -88,6 +89,7 @@ class ConfigHandler():
                         self.drives.append(Path(_temp[i]))
                
                 self.selected_path = Path(self.get_nested_config('directory', 'selected_path'))
+
 
         except json.decoder.JSONDecodeError as e:
             print(f"\nJSONDecodeError - - -> ['configs'] Weren't loaded. {e}.\n")

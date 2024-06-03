@@ -13,10 +13,10 @@
     "directory": {
 
         "first_path_occurrence": false,
-        "num_of_processes": 60,
+        "num_of_processes": 100,
 
         "drives": [],
-        "excluded_paths": [],
+        "excluded_paths": ["D:/", "C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
 
         "selected_path": ""
 

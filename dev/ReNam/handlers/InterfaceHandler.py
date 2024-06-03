@@ -255,7 +255,7 @@ class InterfaceHandler():
         ) -> Any:
 
         while True:
-            sleep(1)
+            sleep(0.5)
 
             self.display_interface(
                 headers=headers,
