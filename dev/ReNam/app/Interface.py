@@ -33,7 +33,7 @@ class Interface():
             match int(option):
                 case 1:
                     self.rename_menu()
-                    
+
                 case 2:
                     self.configs_menu()
 
@@ -78,6 +78,8 @@ class Interface():
 
     def configs_menu(self) -> None:
         print("\n")
+
+        print(self.app.configs)
 
         HEADERS = ["CONFIG", "VALUE"]
         CONTENTS = categorize_contents(

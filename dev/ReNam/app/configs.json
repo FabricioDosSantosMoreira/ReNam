@@ -1,6 +1,6 @@
 {
     "interface": {
-        "input_message": "\n- - - - - - - -> Insert an option: ",
+        "input_message": "└──────────────> Insert an option: ",
 
         "min_interface_size": 90,
         "max_string_length": 90,

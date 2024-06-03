@@ -92,11 +92,11 @@ class InterfaceHandler():
 
         # Adjust the sizes in 'distributed_str_sizes' to ensure only even sizes, decreases by '1' if odd.
         for i in range(len(distributed_str_sizes)):
-            # TODO: check if this works
-            if sum(distributed_str_sizes) == self.min_interface_size:
-                continue
-            else:
+            # TODO: check if works
+            if sum(distributed_str_sizes) >= min_size:
                 distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=True)
+            else:
+                distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=False)
 
 
         # Build 'border_str'.

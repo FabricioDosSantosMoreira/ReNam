@@ -39,8 +39,6 @@ class ConfigHandler():
     def __str__(self) -> str:
         return (
             f"ConfigHandler(\n"
-            f"  app={self.app},\n"
-            f"  configs={self.configs},\n"
             f"  input_msg='{self.input_msg}',\n"
             f"  min_interface_size={self.min_interface_size},\n"
             f"  max_string_length={self.max_string_length},\n"
