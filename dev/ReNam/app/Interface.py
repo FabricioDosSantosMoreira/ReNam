@@ -1,6 +1,5 @@
 from typing import Optional, Dict, List, Any
 
-
 from utils.generic_utils import categorize_contents
 
 
@@ -14,8 +13,12 @@ class Interface():
 
     def update(self) -> None:
         self.app.update()
+
+
+    def quit(self) -> None:
+        self.app.quit()
                 
-        
+
     def menu(self) -> None:
         while True:
             print("\n")
@@ -25,19 +28,52 @@ class Interface():
                 contents=["RENAM", "CONFIGS", "QUIT"]
             )
            
-
-
             option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
 
             match int(option):
                 case 1:
                     self.rename_menu()
-
+                    
                 case 2:
                     self.configs_menu()
 
                 case 3:
-                    self.app.quit()
+                    self.quit()
+
+
+    def rename_menu(self) -> None:
+        while True:
+            print("\n")
+
+            HEADERS = ["OPTIONS", "RENAME MENU"]
+            CONTENTS = categorize_contents(
+                contents=["SELECT DIRECTORY", "GO BACK", "QUIT"]
+            )
+
+            option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
+
+            match int(option):
+                case 1: 
+                    print("aa")
+
+                case 2:
+                    self.menu()
+
+                case 3:
+                    self.quit()
+
+        
+        
+
+
+
+
+
+
+
+
+
+
 
 
     def configs_menu(self) -> None:
@@ -70,8 +106,7 @@ class Interface():
        
 
 
-    def rename_menu(self) -> None:
-        pass
+    
 
 
 

@@ -7,14 +7,17 @@ from typing import List, Union
 
 import scandir
 
-from handlers.ConfigsHandler import ConfigHandler
 
 
 class DirectoryHandler():
 
     __absolute_path_found: bool = False
 
-    def __init__(self, configs: ConfigHandler) -> None:
+    def __init__(self, app) -> None:
+        from Main import Main
+
+        self.app: Main = app
+
 
         self._first_path_occurrence: bool
         self._num_of_processes: int
@@ -25,18 +28,19 @@ class DirectoryHandler():
         self.paths: List[Path]
         self.selected_path: Path
 
-        self.update_configs(configs=configs)
+        self.update()
 
 
-    def update_configs(self, *, configs: ConfigHandler) -> None:
+    def update(self) -> None:
+        configs = self.app.configs
 
-        self.first_path_occurrence = configs.get_config("first_path_occurrence")
-        self.num_of_processes = configs.get_config("num_of_processes")
+        self.first_path_occurrence = configs.first_path_occurrence
+        self.num_of_processes = configs.num_of_processes
 
-        self.drives = configs.get_config("drives")
-        self.excluded_paths = configs.get_config("excluded_paths")
+        self.drives = configs.drives
+        self.excluded_paths = configs.excluded_paths
 
-        self.selected_path = configs.get_config("selected_path")
+        self.selected_path = configs.selected_path
 
 
     @staticmethod

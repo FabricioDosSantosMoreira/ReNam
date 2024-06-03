@@ -1,6 +1,7 @@
 from app.Interface import Interface
 from handlers.ConfigsHandler import ConfigHandler
 from handlers.InterfaceHandler import InterfaceHandler
+from handlers.DirectoryHandler import DirectoryHandler
 
 
 class Main():
@@ -16,6 +17,7 @@ class Main():
         # Handlers
         self.configs = ConfigHandler(self)
         self.interface_handler = InterfaceHandler(self)
+        self.directory_handler = DirectoryHandler(self)
 
 
         # Interface

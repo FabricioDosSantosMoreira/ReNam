@@ -78,8 +78,6 @@ class InterfaceHandler():
             if distributed_str_sizes[i] < str_size:
                 distributed_str_sizes[i] = str_size
 
-        print(distributed_str_sizes)
-
 
         # Calculate the necessary size for the last column
         if use_last_col:

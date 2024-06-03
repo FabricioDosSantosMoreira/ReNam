@@ -8,6 +8,18 @@
 
         "contents_pos": ["left", "left"],
         "headers_pos": ["left", "left"]
+    },
+
+    "directory": {
+
+        "first_path_occurrence": false,
+        "num_of_processes": 60,
+
+        "drives": [],
+        "excluded_paths": [],
+
+        "selected_path": ""
+
     }
-    
+
 }
