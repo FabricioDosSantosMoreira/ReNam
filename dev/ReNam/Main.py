@@ -2,6 +2,7 @@ from app.Interface import Interface
 from handlers.ConfigsHandler import ConfigHandler
 from handlers.InterfaceHandler import InterfaceHandler
 from handlers.DirectoryHandler import DirectoryHandler
+from handlers.MidiaHandler import Midia
 
 
 class Main():

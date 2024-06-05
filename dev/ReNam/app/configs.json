@@ -1,4 +1,10 @@
 {
+    "api": {
+        "API_KEY": "",
+        "MAX_SEARCH": 15
+    },
+
+
     "interface": {
         "input_message": "└──────────────> Insert an option: ",
 
@@ -10,8 +16,8 @@
         "headers_pos": ["left", "left"]
     },
 
-    "directory": {
 
+    "directory": {
         "first_path_occurrence": false,
         "num_of_processes": 100,
 
@@ -19,7 +25,15 @@
         "excluded_paths": ["D:/", "C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
 
         "selected_path": ""
+    },
 
+
+    "midia": {
+        "USE_NAME_FROM_API": false,
+
+        "file_formats": [],
+        "regex_patterns": ["S(\\d+)E(\\d+)", "s(\\d+)\\.e(\\d+)", "EP\\.(\\d+)"]
+        
     }
-
+    
 }

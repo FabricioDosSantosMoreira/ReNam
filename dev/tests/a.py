@@ -1,5 +1,5 @@
-from ReNam.handlers.DirectoryHandler import DirectoryHandler
-from ReNam.handlers.ConfigsHandler import ConfigHandler
+from handlers.DirectoryHandler import DirectoryHandler
+from handlers.ConfigsHandler import ConfigHandler
 
 
 from pathlib import Path

@@ -56,7 +56,18 @@ class DirectoryHandler():
             drives.append(drive)
 
         return drives
+    
 
+    @staticmethod
+    def filter_files(files: List[Path], formats: List[str]) -> List[Path]:
+
+        filtered = []
+        for file in files:
+            if file.suffix in formats:
+                filtered.append(file)
+
+        return filtered
+            
 
     @staticmethod
     def get_directory_files(path: Path) -> List[Path]:
@@ -98,7 +109,7 @@ class DirectoryHandler():
             suffixes.append(path.suffix)
 
         return suffixes
-
+    
 
     def search_drives(self, path: Path) -> Union[List[Path], None]:
 
