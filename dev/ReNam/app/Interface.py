@@ -22,6 +22,8 @@ class Interface():
         while True:
             print("\n")
 
+            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUUUU")
+
             HEADERS = ["OPTIONS", "MENU"]
             CONTENTS = categorize_contents(
                 contents=["RENAM", "CONFIGS", "QUIT"]
@@ -81,7 +83,7 @@ class Interface():
 
                         dir = str_search_list[option - 1]
 
-                        self.app.interface_handler.display_interface_msg(f"{dir}", self.app.configs.min_interface_size)
+                        self.app.interface_handler.display_msg_box(msg = f"{dir}")
 
 
                     except Exception as e:

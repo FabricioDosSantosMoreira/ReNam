@@ -1,4 +1,4 @@
-from typing import Optional, Literal, List, Any, AnyStr
+from typing import Optional, Literal, List
 
 
 def categorize_contents(

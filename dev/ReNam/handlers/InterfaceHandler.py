@@ -1,11 +1,11 @@
-from typing import Optional, Dict, List, Any
+from typing import Callable, Optional, Dict, List, Any, Tuple, Union
 from wcwidth import wcswidth
 from time import sleep
 
-
 from utils.generic_utils import match_parity, evenly_assign_value_to_list
 from utils.string_utils import has_non_ascii
-from utils.input_utils import read_int, read_str
+from utils.input_utils import read_int
+
 
 class InterfaceHandler():
 
@@ -20,6 +20,13 @@ class InterfaceHandler():
         self.min_interface_size: int
         self.max_string_length: int
 
+        self.interface_symbols: Dict[str, str] = {'mid': '+', 
+                                                  'line_a': '-', 
+                                                  'line_b': '=', 
+                                                  'div': '|'}
+        
+        
+
         self.update()
 
 
@@ -33,36 +40,42 @@ class InterfaceHandler():
         self.max_string_length = configs.max_string_length
 
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def display_interface(
             self, 
             headers: List[str],
-            contents: List[List[Any]], 
+            contents: List[List[str]], 
             *, 
             use_last_col: Optional[bool] = True,
     ) -> None:
-        
-
 
         headers_pos = self.headers_pos
         contents_pos = self.contents_pos
-        min_size = self.min_interface_size
 
-        # TODO: - check if this works
-        #       - accept contents, headers as Any and transform to str
-        headers_length = len(headers)
-        contents_length = len(contents)
-        
-        
         # Create a List based on the size of 'len(headers)', Assigning integers representing lengths.
         # It can either distribute a value evenly or place a specific value at the end of the list
         distributed_str_sizes = evenly_assign_value_to_list(
-                                    value=min_size, 
-                                    size=headers_length, 
+                                    value=self.min_interface_size, 
+                                    size=len(headers), 
                                     assign_at_end=use_last_col)
 
 
         # Calculate each 'str_size' based on 'max_content_length' and change 'distributed_str_sizes' if necessary.
-        for i in range(headers_length):
+        for i in range(len(headers)):
             str_size = 8  # Default size of 8 characters.
 
             # Get the maximum length of a content in contents.
@@ -93,157 +106,268 @@ class InterfaceHandler():
         # Adjust the sizes in 'distributed_str_sizes' to ensure only even sizes, decreases by '1' if odd.
         for i in range(len(distributed_str_sizes)):
             # TODO: check if works
-            if sum(distributed_str_sizes) >= min_size:
+            if sum(distributed_str_sizes) >= self.min_interface_size:
                 distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=True)
             else:
                 distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=False)
 
 
-        # Build 'border_str'.
-        symbol_count_used: list = []
-        border_str: str = "+"
-        for i in range(headers_length): 
-            for symbol_count in range(distributed_str_sizes[i]): 
+        border_string, symbols_count = self.__build_border(
+                                                headers_sizes=distributed_str_sizes,
+                                                headers_qty=len(headers))
 
-                if (symbol_count % 2) == 0:
-                    border_str += '-'  # Add '-' for even indices
+
+        headers_string = self.__build_headers(headers=headers, headers_pos=headers_pos, symbols_count=symbols_count)
+
+
+        contents_string = self.__build_contents(contents=contents, contents_pos=contents_pos, symbols_count=symbols_count)
+
+
+        print(border_string)
+        print(headers_string)
+        print(border_string)
+        print(contents_string, end="")
+        print(border_string)
+
+
+
+
+
+
+
+
+
+
+
+
+    def __build_border(
+            self, 
+            *,
+            headers_sizes: List[int], 
+            headers_qty: Optional[int] = 1,
+            symbols: Optional[Dict[str, str]] = None
+        ) -> Tuple[str, List[int]]:
+
+        symbols = symbols if symbols is not None else self.interface_symbols
+
+
+        symbol_count: List[int] = []
+        border: str = symbols['mid']
+
+        for i in range(headers_qty): 
+
+            for n in range(headers_sizes[i]): 
+
+                if n % 2 == 0:
+                    border += symbols['line_a']  # Add 'line_a' for even indices.
+
                 else:
-                    border_str += '='  # Add '=' for odd indices
+                    border += symbols['line_b']  # Add 'line_b' for odd indices.
 
-                if distributed_str_sizes[i] - 2 == symbol_count: 
-                    border_str += '+'  # add '+' if it is the end of the column
-
-                    # 'symbol_count_used' is used later
-                    symbol_count_used.append(symbol_count)  
+                if headers_sizes[i] - 2 == n: 
+                    border += symbols['mid']  # add 'mid' if it is the end of the column.
+                    symbol_count.append(n)  
                     break
 
+        return border, symbol_count
+    
 
-        # Build 'headers_string' based on 'headers_pos'.
-        headers_string: str = "|"
-        for i in range(headers_length):
+    def __build_headers(
+            self,
+            *,
+            headers: List[str],
+            headers_pos: List[str],
+            symbols_count: List[int],
+            div_symbol: Optional[str] = None
+        ) -> str:
+
+        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
+
+
+        built_headers: str = div_symbol # Default is '|'
+        for i in range(len(headers)):
             
-            # If 'headers_pos[i]' isn't availiable, 'headers_pos[-1]' is used.
-            try:
-                pos = headers_pos[i]
-            except IndexError:
-                pos = headers_pos[-1]
+            pos = self.__get_pos(positions=headers_pos, index=i)
 
-            # 'headers[i]' Isn't an ASCII string
-            visual_width = 0
-            if has_non_ascii(headers[i]):
-                visual_width = wcswidth(headers[i]) - len(headers[i])
+            visual_width = self.__get_visual_width(string=headers[i])
+
+            width = symbols_count[i] - visual_width
+            built_headers += self.__format_string(string=headers[i], width=width, pos=pos, div_symbol=div_symbol)
 
 
-            if pos == 'left':  
-                width = symbol_count_used[i] - 2 - visual_width
-                headers_string += f"   {headers[i].upper().ljust(width)}" + "|"
+        return built_headers
+    
 
-            elif pos == 'right':
-                width = symbol_count_used[i] - 2 - visual_width
-                headers_string += f"{headers[i].upper().rjust(width)}   " + "|"
+    def __build_contents(
+            self,
+            *,
+            contents: List[List[str]],
+            contents_pos: List[str],
+            symbols_count: List[int],
+            div_symbol: Optional[str] = None
+        ) -> str:
 
-            else:  # Default is 'center'.
-                width = symbol_count_used[i] + 1 - visual_width
-                headers_string += f"{headers[i].upper().center(width)}" + "|"
-
-
-        # Build 'contents_str' based on 'contents_pos'.
-        contents_str: str = ""
-        for i in range(contents_length):
-            contents_str += "|"
-
-            for y in range(headers_length):
-
-                # If 'contents_pos[i]' isn't availiable, 'contents_pos[-1]' is used.
-                try:
-                    pos = contents_pos[y]
-                except IndexError:
-                    pos = contents_pos[-1]
-
-                # 'contents[i][y]' Isn't an ASCII string?
-                visual_width = 0
-                if has_non_ascii(contents[i][y]):
-                    visual_width = wcswidth(contents[i][y]) - len(contents[i][y])
+        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
 
 
-                if pos == 'left':
-                    width = symbol_count_used[y] - 2 - visual_width 
-                    contents_str += f"   {contents[i][y].title().ljust(width)}" + "|"
+        built_contents: str = ""
+        for i in range(len(contents)):
+            built_contents += div_symbol # Default is '|'
+            
+            for y in range(len(symbols_count)):
+
+                pos = self.__get_pos(positions=contents_pos, index=y)
+
+                visual_width = self.__get_visual_width(string=contents[i][y])
+
+                width = symbols_count[y] - visual_width
+                built_contents += self.__format_string(
+                                            string=contents[i][y],
+                                            width=width,
+                                            pos=pos,
+                                            div_symbol=div_symbol)
+                
+            built_contents += "\n"
+
         
-                elif pos == "right":
-                    width = symbol_count_used[y] - 2 - visual_width 
-                    contents_str += f"{contents[i][y].title().rjust(width)}   " + "|"
-                    
-                else:  # Default is 'center'.
-                    width = symbol_count_used[y] + 1 - visual_width
-                    contents_str += f"{contents[i][y].title().center(width)}" + "|"
-            
-            contents_str += "\n"
+        return built_contents
 
 
-        print(border_str)
-        print(headers_string)
-        print(border_str)
-        print(contents_str, end="")
-        print(border_str)
+    def __get_pos(
+            self, 
+            *, 
+            positions: List[str],
+            index: int
+        ) -> str:
+
+        try:
+            pos = positions[index]
+        except IndexError:
+            pos = positions[-1]
+
+        return pos
 
 
+    def __get_visual_width(
+            self, 
+            *, 
+            string: str
+        ) -> int:
 
+        visual_width: int = 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def display_interface_msg(self, msg: str, size: int = 0) -> None:
-            
-         # Adjust size if it's less than the minimum required for the border and message
-        size = max(len(msg) + 6, size)
-
-        border_str: str = "+"
-
-        if size % 2 != 0:
-            remaining = 3
+        if has_non_ascii(string):
+            visual_width = wcswidth(string) - len(string)
         else:
-            remaining = 4
+            visual_width = len(string)
 
-        # Build 'border_str'
-        for symbol in range(size):  # Iterate through each index of 'str_sizes_list'
+        return visual_width
 
-            if (symbol % 2) == 0:
-                border_str += "-"  # Add "-" for even indices
-            else:
-                border_str += "="  # Add "=" for odd indices
 
-            if size - remaining == symbol:  # If it is the end of the column
-                border_str += "+"  # add "+"
-                break
+    def __format_string(
+            self,
+            *,
+            string: str,
+            width: int,
+            pos: str,
+            div_symbol: str,
+            func: Optional[Callable[[str], str]] = None
+        ) -> str:
 
-        print(border_str)
-        print(f"|   {msg.ljust(size - remaining - 2)}" + "|")
+        if func is not None:
+            string = func(string)   
+
+        if pos == 'left':  
+            width -= 2 
+            formated_string = f"   {string.ljust(width)}" + div_symbol
+
+        elif pos == 'right':
+            width -= 2 
+            formated_string = f"{string.rjust(width)}   " + div_symbol
+
+        else:  # Default is 'center'.
+            width += 1 
+            formated_string = f"{string.center(width)}" + div_symbol
+
+
+        return formated_string
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def display_msg_box(
+            self, 
+            *, 
+            msg: str, 
+            pos: Optional[str] = "right",
+            div_symbol: Optional[str] = None,
+            func: Optional[Callable[[str], str]] = None
+        ) -> None:
+
+        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
+
+        size = self.min_interface_size
+        size = match_parity(value=size, target_parity="even", decrease=True)
+
+        border, symbol_count = self.__build_border(headers_sizes=[size])
+
+        # WTF IS THIS??? msg acts like a header!
+        msg = self.__build_headers(headers=[msg], headers_pos=[pos], symbols_count=symbol_count, div_symbol=div_symbol)
+
+        print(border)
+        print(msg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def select_from_display(

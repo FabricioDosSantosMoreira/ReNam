@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List, Any, AnyStr
+from typing import Optional, Tuple, List
 
 
 def reduce_string_length(

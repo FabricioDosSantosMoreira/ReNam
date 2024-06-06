@@ -8,7 +8,7 @@
     "interface": {
         "input_message": "└──────────────> Insert an option: ",
 
-        "min_interface_size": 90,
+        "min_interface_size": 105,
         "max_string_length": 90,
         "string_delimiter": "..",
 
@@ -35,5 +35,5 @@
         "regex_patterns": ["S(\\d+)E(\\d+)", "s(\\d+)\\.e(\\d+)", "EP\\.(\\d+)"]
         
     }
-    
+
 }
