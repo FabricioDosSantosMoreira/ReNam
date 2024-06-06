@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Dict, List, Any, Tuple, Union
+from typing import Callable, Optional, Tuple, Dict, List, Any
 from wcwidth import wcswidth
 from time import sleep
 
@@ -40,19 +40,63 @@ class InterfaceHandler():
         self.max_string_length = configs.max_string_length
 
     
+    def display_and_select(
+            self, 
+            headers: List[str], 
+            contents: List[List[str]], 
+            *, 
+            index: Optional[int] = 0,
+        ) -> Any:
+
+        while True:
+            sleep(0.75)
+
+            self.display_interface(headers=headers,contents=contents)
+
+            selection = read_int(msg=self.app.configs.input_msg)
+
+            # Exception from 'read_int_input()', return -1
+            if selection == -1:  
+                return selection # Same as return -1
+
+            # Return a string based on the selected content and its 'index'
+            if len(contents) > (selection - 1) >= 0:  
+                return str(contents[selection - 1][index])
+            
+            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")
+                
+
+    def display_msg_box(
+            self, 
+            *,
+            msg: str, 
+            pos: Optional[str] = "left",
+            func: Optional[Callable[[str], str]] = None,
+            border_at_end: Optional[bool] = False
+        ) -> None:
+
+        div_symbol = self.interface_symbols['div'] 
+        size = self.min_interface_size
+
+        # size must always be even
+        size = match_parity(value=size, target_parity="even", decrease=True)
+
+        # build 'border' and get the 'symbols_count' used to build
+        border, symbol_count = self.__build_border(headers_sizes=[size])
+
+        # msg acts like a header!
+        msg = self.__build_headers(
+                        headers=[msg], 
+                        headers_pos=[pos], 
+                        symbols_count=symbol_count, 
+                        div_symbol=div_symbol
+                    )
 
 
-
-
-
-
-
-
-
-
-
-
-
+        print(border)
+        print(msg)
+        if border_at_end is True:
+            print(border)
 
 
     def display_interface(
@@ -233,12 +277,8 @@ class InterfaceHandler():
         return built_contents
 
 
-    def __get_pos(
-            self, 
-            *, 
-            positions: List[str],
-            index: int
-        ) -> str:
+    def __get_pos(self, *, positions: List[str],index: int) -> str:
+        pos: str = ""
 
         try:
             pos = positions[index]
@@ -248,12 +288,7 @@ class InterfaceHandler():
         return pos
 
 
-    def __get_visual_width(
-            self, 
-            *, 
-            string: str
-        ) -> int:
-
+    def __get_visual_width(self, *, string: str) -> int:
         visual_width: int = 0
 
         if has_non_ascii(string):
@@ -274,9 +309,10 @@ class InterfaceHandler():
             func: Optional[Callable[[str], str]] = None
         ) -> str:
 
+        # Apply a function to the string, like title(), upper(), etc
         if func is not None:
             string = func(string)   
-
+        
         if pos == 'left':  
             width -= 2 
             formated_string = f"   {string.ljust(width)}" + div_symbol
@@ -291,122 +327,3 @@ class InterfaceHandler():
 
 
         return formated_string
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def display_msg_box(
-            self, 
-            *, 
-            msg: str, 
-            pos: Optional[str] = "right",
-            div_symbol: Optional[str] = None,
-            func: Optional[Callable[[str], str]] = None
-        ) -> None:
-
-        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
-
-        size = self.min_interface_size
-        size = match_parity(value=size, target_parity="even", decrease=True)
-
-        border, symbol_count = self.__build_border(headers_sizes=[size])
-
-        # WTF IS THIS??? msg acts like a header!
-        msg = self.__build_headers(headers=[msg], headers_pos=[pos], symbols_count=symbol_count, div_symbol=div_symbol)
-
-        print(border)
-        print(msg)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def select_from_display(
-            self, 
-            headers: List[Any], 
-            contents: List[List[Any]], 
-            *, 
-            id: Optional[int] = 0,
-        ) -> Any:
-
-        while True:
-            sleep(0.5)
-
-            self.display_interface(
-                headers=headers,
-                contents=contents,
-            )
-
-            selection = read_int(msg=self.app.configs.input_msg)
-
-            if selection == -1:  # Exception from 'read_int_input()'
-                return selection # Return -1
-
-            # Return a string based on the selected content and 'id'
-            if len(contents) > (selection - 1) >= 0:  
-                return str(contents[selection - 1][id])
-            
-            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")
-    
-
-
-
-
-
-
-
-
-
-
-
-
-        
