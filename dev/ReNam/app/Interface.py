@@ -22,14 +22,14 @@ class Interface():
         while True:
             print("\n")
 
-            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUUUU")
+            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUUU")
 
             HEADERS = ["OPTIONS", "MENU"]
             CONTENTS = categorize_contents(
                 contents=["RENAM", "CONFIGS", "QUIT"]
             )
            
-            option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
+            option = self.app.interface_handler.display_and_select(HEADERS, CONTENTS)
 
             match int(option):
                 case 1:
@@ -51,13 +51,13 @@ class Interface():
                 contents=["SELECT DIRECTORY", "GO BACK", "QUIT"]
             )
 
-            option = self.app.interface_handler.select_from_display(HEADERS, CONTENTS)
+            option = self.app.interface_handler.display_and_select(HEADERS, CONTENTS)
 
             match int(option):
 
                 case 1: 
                     from pathlib import Path
-                    _temp = read_str(msg="\n Insert full path or directory name: ")
+                    _temp = read_str(msg="\nInsert full path or directory name: ")
                     if _temp == -1:
                         print("continue")
                         continue
@@ -79,11 +79,12 @@ class Interface():
                                 contents=str_search_list
                             )
 
-                        option = int(self.app.interface_handler.select_from_display(HEADERS, CONTENTS))
+                        option = int(self.app.interface_handler.display_and_select(HEADERS, CONTENTS))
 
-                        dir = str_search_list[option - 1]
+                        if option != -1:
+                            dir = str_search_list[option - 1]
 
-                        self.app.interface_handler.display_msg_box(msg = f"{dir}")
+                            self.app.interface_handler.display_msg_box(msg = f"{dir}")
 
 
                     except Exception as e:

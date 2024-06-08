@@ -174,16 +174,6 @@ class InterfaceHandler():
         print(border_string)
 
 
-
-
-
-
-
-
-
-
-
-
     def __build_border(
             self, 
             *,
