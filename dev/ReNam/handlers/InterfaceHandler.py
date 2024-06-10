@@ -1,6 +1,6 @@
 from typing import Callable, Optional, Tuple, Dict, List, Any
 from wcwidth import wcswidth
-from time import sleep
+import time
 
 from utils.generic_utils import match_parity, evenly_assign_value_to_list
 from utils.string_utils import has_non_ascii
@@ -20,13 +20,8 @@ class InterfaceHandler():
         self.min_interface_size: int
         self.max_string_length: int
 
-        self.interface_symbols: Dict[str, str] = {'mid': '+', 
-                                                  'line_a': '-', 
-                                                  'line_b': '=', 
-                                                  'div': '|'}
+        self.interface_symbols: Dict[str, str] = {'mid': '+', 'line_a': '-', 'line_b': '=', 'div': '|'}
         
-        
-
         self.update()
 
 
@@ -39,57 +34,30 @@ class InterfaceHandler():
         self.min_interface_size = configs.min_interface_size
         self.max_string_length = configs.max_string_length
 
+        self.headers_func = str.title
+        self.contents_func = str.lower
+
     
-    def display_and_select(
-            self, 
-            headers: List[str], 
-            contents: List[List[str]], 
-            *, 
-            index: Optional[int] = 0,
-        ) -> Any:
-
-        while True:
-            sleep(0.75)
-
-            self.display_interface(headers=headers,contents=contents)
-
-            selection = read_int(msg=self.app.configs.input_msg)
-
-            # Exception from 'read_int_input()', return -1
-            if selection == -1:  
-                return selection # Same as return -1
-
-            # Return a string based on the selected content and its 'index'
-            if len(contents) > (selection - 1) >= 0:  
-                return str(contents[selection - 1][index])
-            
-            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")
-                
-
     def display_msg_box(
             self, 
             *,
             msg: str, 
             pos: Optional[str] = "left",
-            func: Optional[Callable[[str], str]] = None,
-            border_at_end: Optional[bool] = False
+            border_at_end: Optional[bool] = False,
+            func: Optional[Callable[[str], str]] = None
         ) -> None:
 
-        div_symbol = self.interface_symbols['div'] 
-        size = self.min_interface_size
-
-        # size must always be even
-        size = match_parity(value=size, target_parity="even", decrease=True)
+        # 'interface_size' must always be even
+        interface_size = match_parity(value=self.min_interface_size, target_parity="even", decrease=True)
 
         # build 'border' and get the 'symbols_count' used to build
-        border, symbol_count = self.__build_border(headers_sizes=[size])
+        border, symbol_count = self.__build_border(column_widths=[interface_size], num_of_columns=1, symbols=self.interface_symbols)
 
-        # msg acts like a header!
+        # 'msg' acts like a header
         msg = self.__build_headers(
                         headers=[msg], 
                         headers_pos=[pos], 
                         symbols_count=symbol_count, 
-                        div_symbol=div_symbol
                     )
 
 
@@ -98,6 +66,30 @@ class InterfaceHandler():
         if border_at_end is True:
             print(border)
 
+
+    def display_and_select(
+            self, 
+            headers: List[str], 
+            contents: List[List[str]], 
+            *, 
+            index: Optional[int] = 0,
+        ) -> str:
+
+        while True:
+            time.sleep(0.75)
+
+            self.display_interface(headers=headers,contents=contents)
+
+            selection = read_int(msg=self.app.configs.input_msg)
+            if selection == -1:  # Exception from 'read_int()', return -1.
+                return -1
+
+            # Return a string based on the selected content and its 'index'.
+            if len(contents) > (selection - 1) >= 0:  
+                return str(contents[selection - 1][index])
+            
+            print("\nWarning - - -> Selection wasn't valid. Please, Try again.")
+                
 
     def display_interface(
             self, 
@@ -157,8 +149,9 @@ class InterfaceHandler():
 
 
         border_string, symbols_count = self.__build_border(
-                                                headers_sizes=distributed_str_sizes,
-                                                headers_qty=len(headers))
+                                                column_widths=distributed_str_sizes,
+                                                num_of_columns=len(headers),
+                                                symbols=self.interface_symbols)
 
 
         headers_string = self.__build_headers(headers=headers, headers_pos=headers_pos, symbols_count=symbols_count)
@@ -174,37 +167,69 @@ class InterfaceHandler():
         print(border_string)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def __build_border(
             self, 
             *,
-            headers_sizes: List[int], 
-            headers_qty: Optional[int] = 1,
-            symbols: Optional[Dict[str, str]] = None
+            column_widths: List[int], 
+            num_of_columns: int,
+            symbols: Dict[str, str]
+            
         ) -> Tuple[str, List[int]]:
+        """
+        Constructs a border string and a list of width counts.
 
-        symbols = symbols if symbols is not None else self.interface_symbols
+        Args:
 
 
-        symbol_count: List[int] = []
-        border: str = symbols['mid']
+        Returns:
+            Tuple[str, List[int]]: A tuple containing the border string and a list of width counts.
+        """
+        width_count: List[int] = []
 
-        for i in range(headers_qty): 
 
-            for n in range(headers_sizes[i]): 
+        border = symbols['mid']  # Start with the 'mid' symbol
+        for col in range(num_of_columns): 
+            for width in range(column_widths[col] -1): 
 
-                if n % 2 == 0:
-                    border += symbols['line_a']  # Add 'line_a' for even indices.
-
+                if width % 2 == 0:
+                    border += symbols['line_a']  # Add 'line_a' symbol for even indices
                 else:
-                    border += symbols['line_b']  # Add 'line_b' for odd indices.
+                    border += symbols['line_b']  # Add 'line_b' symbol for odd indices
 
-                if headers_sizes[i] - 2 == n: 
-                    border += symbols['mid']  # add 'mid' if it is the end of the column.
-                    symbol_count.append(n)  
-                    break
+            border += symbols['mid']  # add 'mid' symbol to the end of the column
+            width_count.append(width)
 
-        return border, symbol_count
+                # if column_widths[col] - 2 == width: 
+                #      border += symbols['mid']  # add 'mid' if it is the end of the column
+                #      width_count.append(width)  
+                #      break
+
+
+        return border, width_count
     
+
+
+
+
+
 
     def __build_headers(
             self,
@@ -212,13 +237,12 @@ class InterfaceHandler():
             headers: List[str],
             headers_pos: List[str],
             symbols_count: List[int],
-            div_symbol: Optional[str] = None
         ) -> str:
 
-        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
+        div_symbol = self.interface_symbols['div']
 
 
-        built_headers: str = div_symbol # Default is '|'
+        built_headers = div_symbol 
         for i in range(len(headers)):
             
             pos = self.__get_pos(positions=headers_pos, index=i)
@@ -238,10 +262,9 @@ class InterfaceHandler():
             contents: List[List[str]],
             contents_pos: List[str],
             symbols_count: List[int],
-            div_symbol: Optional[str] = None
         ) -> str:
 
-        div_symbol = div_symbol if div_symbol is not None else self.interface_symbols['div']
+        div_symbol = self.interface_symbols['div']
 
 
         built_contents: str = ""
@@ -267,24 +290,58 @@ class InterfaceHandler():
         return built_contents
 
 
-    def __get_pos(self, *, positions: List[str],index: int) -> str:
-        pos: str = ""
+    def __get_pos(self, *, positions: List[str], index: int) -> str:
+        """
+        Retrieve the position at the specified index from the list of positions.
+        If the specified index is out of range, return the last position in the list.
+    
+        Args:
+        positions (List[str]): A list of position strings.
+        index (int): The index of the desired position in the list.
+        
+        Returns:
+            str: 
+                The position string at the specified index or the last position if the index is out of range.
+        """
+        pos: str
 
         try:
-            pos = positions[index]
+            # Attempt to retrieve the position at the specified index.
+            pos = positions[index]  
         except IndexError:
+            # If the index is out of range, return the last position in the list.
             pos = positions[-1]
+
 
         return pos
 
 
     def __get_visual_width(self, *, string: str) -> int:
-        visual_width: int = 0
+        """
+        Calculate the visual width of a given string.
 
+        This function determines the visual width of a string, accounting for the 
+        differences between ASCII and non-ASCII characters. Non-ASCII characters 
+        may have different widths when displayed compared to ASCII characters.
+
+        Args:
+        string (str): The input string for which to calculate the visual width.
+
+        Returns:
+            int:
+                The calculated visual width of the string.
+        """
+        visual_width: int
+
+        # Check if the string contains any non-ASCII characters.
         if has_non_ascii(string):
+
+            # Calculate visual width using wcswidth and adjust for the length difference.
             visual_width = wcswidth(string) - len(string)
         else:
+            # For ASCII strings, the visual width is simply the length of the string.
             visual_width = len(string)
+
 
         return visual_width
 
@@ -299,10 +356,12 @@ class InterfaceHandler():
             func: Optional[Callable[[str], str]] = None
         ) -> str:
 
+
+
         # Apply a function to the string, like title(), upper(), etc
         if func is not None:
             string = func(string)   
-        
+
         if pos == 'left':  
             width -= 2 
             formated_string = f"   {string.ljust(width)}" + div_symbol

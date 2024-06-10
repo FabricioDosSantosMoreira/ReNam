@@ -22,7 +22,7 @@ class Interface():
         while True:
             print("\n")
 
-            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUUU")
+            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUU", pos='left')
 
             HEADERS = ["OPTIONS", "MENU"]
             CONTENTS = categorize_contents(
