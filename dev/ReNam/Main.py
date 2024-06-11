@@ -20,7 +20,6 @@ class Main():
         self.interface_handler = InterfaceHandler(self)
         self.directory_handler = DirectoryHandler(self)
 
-
         # Interface
         self.interface = Interface(self)
         
@@ -40,6 +39,7 @@ class Main():
     def update(self) -> None:
         self.configs.update()
         self.interface_handler.update()
+        self.directory_handler.update()
         self.run()
 
 

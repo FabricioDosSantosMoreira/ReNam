@@ -3,7 +3,7 @@ from wcwidth import wcswidth
 import time
 
 from utils.generic_utils import match_parity, evenly_assign_value_to_list
-from utils.string_utils import has_non_ascii
+from utils.string_utils import has_non_ascii, reduce_string_length, reduce_strings_length
 from utils.input_utils import read_int
 
 
@@ -13,31 +13,39 @@ class InterfaceHandler():
         from Main import Main
 
         self.app: Main = app
+    
+        self.min_interface_size: int = 0
+        self.max_string_length: int = 0
 
-        self.contents_pos: List[str]
-        self.headers_pos: List[str]
+        self.interface_symbols: Dict[str, str] = {}
+        self.delimiter: str = ''
+        self.input_msg: str = ''
 
-        self.min_interface_size: int
-        self.max_string_length: int
+        self.headers_pos: List[str] = []
+        self.contents_pos: List[str] = []
+        self.headers_func: Callable[[str], str] = None
+        self.contents_func: Callable[[str], str] = None
 
-        self.interface_symbols: Dict[str, str] = {'mid': '+', 'line_a': '-', 'line_b': '=', 'div': '|'}
-        
+
         self.update()
 
 
     def update(self) -> None:
         configs = self.app.configs
 
-        self.contents_pos = configs.contents_pos
-        self.headers_pos = configs.headers_pos
-
         self.min_interface_size = configs.min_interface_size
         self.max_string_length = configs.max_string_length
 
-        self.headers_func = str.title
-        self.contents_func = str.lower
+        self.interface_symbols = configs.interface_symbols
+        self.delimiter = configs.delimiter
+        self.input_msg = configs.input_msg
 
-    
+        self.headers_pos = configs.headers_pos
+        self.contents_pos = configs.contents_pos
+        self.headers_func = configs.headers_func
+        self.contents_func = configs.contents_func
+
+
     def display_msg_box(
             self, 
             *,
@@ -47,17 +55,25 @@ class InterfaceHandler():
             func: Optional[Callable[[str], str]] = None
         ) -> None:
 
+        msg = reduce_string_length(string=msg, length=self.max_string_length, delimiter=self.delimiter)
+
         # 'interface_size' must always be even
         interface_size = match_parity(value=self.min_interface_size, target_parity="even", decrease=True)
 
-        # build 'border' and get the 'symbols_count' used to build
-        border, symbol_count = self.__build_border(column_widths=[interface_size], num_of_columns=1, symbols=self.interface_symbols)
+        # build 'border' and get the 'width_count' used to build
+        border, width_count = self.__build_border(
+                                        column_widths=[interface_size], 
+                                        num_of_columns=1, 
+                                        symbols=self.interface_symbols
+                                    )
 
         # 'msg' acts like a header
         msg = self.__build_headers(
                         headers=[msg], 
                         headers_pos=[pos], 
-                        symbols_count=symbol_count, 
+                        width_count=width_count, 
+                        symbols=self.interface_symbols,
+                        func=func
                     )
 
 
@@ -69,18 +85,18 @@ class InterfaceHandler():
 
     def display_and_select(
             self, 
+            *,
             headers: List[str], 
             contents: List[List[str]], 
-            *, 
             index: Optional[int] = 0,
         ) -> str:
 
         while True:
             time.sleep(0.75)
 
-            self.display_interface(headers=headers,contents=contents)
+            self.display_interface(headers=headers.copy(),contents=contents.copy())
 
-            selection = read_int(msg=self.app.configs.input_msg)
+            selection = read_int(msg=self.input_msg)
             if selection == -1:  # Exception from 'read_int()', return -1.
                 return -1
 
@@ -93,14 +109,25 @@ class InterfaceHandler():
 
     def display_interface(
             self, 
+            *,
             headers: List[str],
             contents: List[List[str]], 
-            *, 
             use_last_col: Optional[bool] = True,
     ) -> None:
-
-        headers_pos = self.headers_pos
-        contents_pos = self.contents_pos
+        
+        headers = reduce_strings_length(
+                    strings=headers, 
+                    length=self.max_string_length, 
+                    delimiter=self.delimiter, 
+                )
+        
+        for i, content in enumerate(contents):
+            contents[i] = reduce_strings_length(
+                            strings=content, 
+                            length=self.max_string_length, 
+                            delimiter=self.delimiter, 
+                            end_cut=False
+                        )
 
         # Create a List based on the size of 'len(headers)', Assigning integers representing lengths.
         # It can either distribute a value evenly or place a specific value at the end of the list
@@ -115,7 +142,9 @@ class InterfaceHandler():
             str_size = 8  # Default size of 8 characters.
 
             # Get the maximum length of a content in contents.
-            max_content_length = max(wcswidth(content[i]) for content in contents)
+            # TODO: check which works
+            # max_content_length = max(wcswidth(content[i]) for content in contents)
+            max_content_length = max(self.__get_visual_width(string=content[i]) for content in contents)
 
             # Add the largest value to 'str_size'.
             if max_content_length > len(headers[i]):
@@ -148,16 +177,26 @@ class InterfaceHandler():
                 distributed_str_sizes[i] = match_parity(value=distributed_str_sizes[i], target_parity="even", decrease=False)
 
 
-        border_string, symbols_count = self.__build_border(
+        border_string, width_count = self.__build_border(
                                                 column_widths=distributed_str_sizes,
                                                 num_of_columns=len(headers),
                                                 symbols=self.interface_symbols)
 
+        headers_string = self.__build_headers(
+                                    headers=headers, 
+                                    headers_pos=self.headers_pos, 
+                                    width_count=width_count, 
+                                    symbols=self.interface_symbols,
+                                    func=self.headers_func
+                                )
 
-        headers_string = self.__build_headers(headers=headers, headers_pos=headers_pos, symbols_count=symbols_count)
-
-
-        contents_string = self.__build_contents(contents=contents, contents_pos=contents_pos, symbols_count=symbols_count)
+        contents_string = self.__build_contents(
+                                    contents=contents, 
+                                    contents_pos=self.contents_pos, 
+                                    width_count=width_count, 
+                                    symbols=self.interface_symbols,
+                                    func=self.contents_func
+                                )
 
 
         print(border_string)
@@ -167,41 +206,14 @@ class InterfaceHandler():
         print(border_string)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def __build_border(
             self, 
             *,
             column_widths: List[int], 
             num_of_columns: int,
             symbols: Dict[str, str]
-            
         ) -> Tuple[str, List[int]]:
-        """
-        Constructs a border string and a list of width counts.
 
-        Args:
-
-
-        Returns:
-            Tuple[str, List[int]]: A tuple containing the border string and a list of width counts.
-        """
         width_count: List[int] = []
 
 
@@ -217,40 +229,36 @@ class InterfaceHandler():
             border += symbols['mid']  # add 'mid' symbol to the end of the column
             width_count.append(width)
 
-                # if column_widths[col] - 2 == width: 
-                #      border += symbols['mid']  # add 'mid' if it is the end of the column
-                #      width_count.append(width)  
-                #      break
-
 
         return border, width_count
     
-
-
-
-
-
 
     def __build_headers(
             self,
             *,
             headers: List[str],
             headers_pos: List[str],
-            symbols_count: List[int],
+            width_count: List[int],
+            symbols: Dict[str, str],
+            func: Optional[Callable[[str], str]] = None
         ) -> str:
 
-        div_symbol = self.interface_symbols['div']
-
-
-        built_headers = div_symbol 
-        for i in range(len(headers)):
+        
+        built_headers = symbols['div']  # Start with the 'div' symbol
+        for i, header in enumerate(headers):
             
-            pos = self.__get_pos(positions=headers_pos, index=i)
+            alignment = self.__get_alignment(alignments=headers_pos, index=i)
 
-            visual_width = self.__get_visual_width(string=headers[i])
+            visual_width = self.__get_visual_width(string=header)
+            width = width_count[i] - visual_width
 
-            width = symbols_count[i] - visual_width
-            built_headers += self.__format_string(string=headers[i], width=width, pos=pos, div_symbol=div_symbol)
+            built_headers += self.__format_string(
+                                        string=header, 
+                                        width=width, 
+                                        alignment=alignment, 
+                                        divider=symbols['div'],
+                                        func=func,
+                                    )
 
 
         return built_headers
@@ -261,28 +269,30 @@ class InterfaceHandler():
             *,
             contents: List[List[str]],
             contents_pos: List[str],
-            symbols_count: List[int],
+            width_count: List[int],
+            symbols: Dict[str, str],
+            func: Optional[Callable[[str], str]] = None
         ) -> str:
 
-        div_symbol = self.interface_symbols['div']
 
-
-        built_contents: str = ""
-        for i in range(len(contents)):
-            built_contents += div_symbol # Default is '|'
+        built_contents = ""  # Start with an empty string
+        for i, content in enumerate(contents):
+            built_contents += symbols['div'] 
             
-            for y in range(len(symbols_count)):
+            for w, string in enumerate(content):
 
-                pos = self.__get_pos(positions=contents_pos, index=y)
+                alignment = self.__get_alignment(alignments=contents_pos, index=w)
 
-                visual_width = self.__get_visual_width(string=contents[i][y])
+                visual_width = self.__get_visual_width(string=string)
+                width = width_count[w] - visual_width
 
-                width = symbols_count[y] - visual_width
                 built_contents += self.__format_string(
-                                            string=contents[i][y],
+                                            string=string,
                                             width=width,
-                                            pos=pos,
-                                            div_symbol=div_symbol)
+                                            alignment=alignment,
+                                            divider=symbols['div'],
+                                            func=func
+                                        )
                 
             built_contents += "\n"
 
@@ -290,27 +300,26 @@ class InterfaceHandler():
         return built_contents
 
 
-    def __get_pos(self, *, positions: List[str], index: int) -> str:
+    def __get_alignment(self, *, alignments: List[str], index: int) -> str:
         """
-        Retrieve the position at the specified index from the list of positions.
-        If the specified index is out of range, return the last position in the list.
+        Retrieve the alignment at the specified index from the list of alignments.
+        If the specified index is out of range, return the last alignment in the list.
     
         Args:
-        positions (List[str]): A list of position strings.
-        index (int): The index of the desired position in the list.
+        alignments (List[str]): A list of alignments strings.
+        index (int): The index of the desired alignment in the list.
         
         Returns:
             str: 
-                The position string at the specified index or the last position if the index is out of range.
+                The alignment string at the specified index or the last alignment if the index is out of range.
         """
-        pos: str
 
         try:
-            # Attempt to retrieve the position at the specified index.
-            pos = positions[index]  
+            # Attempt to retrieve the alignment at the specified index.
+            pos = alignments[index]  
         except IndexError:
-            # If the index is out of range, return the last position in the list.
-            pos = positions[-1]
+            # If the index is out of range, return the last alignment in the list.
+            pos = alignments[-1]
 
 
         return pos
@@ -331,7 +340,6 @@ class InterfaceHandler():
             int:
                 The calculated visual width of the string.
         """
-        visual_width: int
 
         # Check if the string contains any non-ASCII characters.
         if has_non_ascii(string):
@@ -351,28 +359,43 @@ class InterfaceHandler():
             *,
             string: str,
             width: int,
-            pos: str,
-            div_symbol: str,
+            alignment: str,
+            divider: str,
             func: Optional[Callable[[str], str]] = None
         ) -> str:
+        """
+        Formats a given string according to specified alignment, width, and a divider.
 
+        Parameters:
+            string (str): The string to be formatted.
+            width (int): The width to which the string should be aligned.
+            alignment (str): The position for alignment.
+            divider (str): A divider string appended to the formatted string.
+            func (Optional[Callable[[str], str]]): A function to apply to the string before formatting. Defaults to None.
 
+        Returns:
+            str: 
+                The formatted string with the specified alignment, width, and divider.
+        """
 
-        # Apply a function to the string, like title(), upper(), etc
+        # Apply a function to the string
         if func is not None:
             string = func(string)   
 
-        if pos == 'left':  
-            width -= 2 
-            formated_string = f"   {string.ljust(width)}" + div_symbol
 
-        elif pos == 'right':
-            width -= 2 
-            formated_string = f"{string.rjust(width)}   " + div_symbol
+        # Check the alignment position
+        if alignment == 'center':  
+            width += 1  # Adjust width for centering
+            formated_string = f"{string.center(width)}" + divider
 
-        else:  # Default is 'center'.
-            width += 1 
-            formated_string = f"{string.center(width)}" + div_symbol
+        elif alignment == 'right':
+            width -= 2  # Adjust width for right-justifying
+            formated_string = f"{string.rjust(width)}   " + divider
+
+        else:  # Default alignment is 'left'
+            width -= 2  # Adjust width for left-justifying
+            formated_string = f"   {string.ljust(width)}" + divider
 
 
         return formated_string
+    

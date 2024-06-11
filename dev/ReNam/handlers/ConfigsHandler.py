@@ -1,6 +1,6 @@
 import json
 
-from typing import List, Any, Dict
+from typing import Callable, Union, List, Any, Dict
 from pathlib import Path
 
 
@@ -10,111 +10,69 @@ class ConfigHandler():
         from Main import Main
         self.app: Main = app
 
-        self.configs: Dict 
-
-        # -=-=-=-=-=-= Interface =-=-=-=-=-=-
-        self.input_msg: str
-
-        self.min_interface_size: int
-        self.max_string_length: int
-        self.string_delimiter: str
-        
-        self.contents_pos: List[str]
-        self.headers_pos: List[str]
+        self.file = Path("ReNam\\app\\configs.json")
 
 
-        # -=-=-=-=-=-= DirectoryHandler() =--=-=-=-=-=-
-        self.first_path_occurrence: bool
+        self.update()
 
-        self.num_of_processes: int
-
-        self.excluded_paths: List[Path]
-        self.drives: List[Path]
-
-        self.selected_path: Path
-
-        self.load_configs()
-
-
-    def __str__(self) -> str:
-        return (
-            f"ConfigHandler(\n"
-            f"  input_msg='{self.input_msg}',\n"
-            f"  min_interface_size={self.min_interface_size},\n"
-            f"  max_string_length={self.max_string_length},\n"
-            f"  string_delimiter='{self.string_delimiter}',\n"
-            f"  contents_pos={self.contents_pos},\n"
-            f"  headers_pos={self.headers_pos},\n"
-            f"  first_path_occurrence={self.first_path_occurrence},\n"
-            f"  num_of_processes={self.num_of_processes},\n"
-            f"  excluded_paths={self.excluded_paths},\n"
-            f"  drives={self.drives},\n"
-            f"  selected_path={self.selected_path}\n"
-            f")"
-        )
-
-
-    def load_configs(self) -> None:
-        json_path = Path('ReNam\\app\\configs.json')
-        try:
-   
-            with open(json_path, 'r', encoding='utf-8') as configs_file:
-                self.configs = json.load(configs_file)
-
-                self.input_msg = self.get_nested_config('interface', 'input_message')
-                self.min_interface_size = self.get_nested_config('interface', 'min_interface_size')
-                self.max_string_length = self.get_nested_config('interface', 'max_string_length')
-                self.string_delimiter = self.get_nested_config('interface', 'string_delimiter')
-                self.contents_pos = self.get_nested_config('interface', 'contents_pos')
-                self.headers_pos = self.get_nested_config('interface', 'headers_pos')
-
-                # Directory
-                self.first_path_occurrence = self.get_nested_config('directory', 'first_path_occurrence')
-
-                self.num_of_processes = self.get_nested_config('directory', 'num_of_processes')
-
-                _temp = self.get_nested_config('directory', 'excluded_paths')
-                if len(_temp) == 0:
-                    self.excluded_paths = []
-                else:
-                    self.excluded_paths = []
-                    for i in range(len(_temp)):
-                        self.excluded_paths.append(Path(_temp[i]))
-
-                _temp = self.get_nested_config('directory', 'drives')
-                if len(_temp) == 0:
-                    self.drives = []
-                else:
-                    for i in range(len(_temp)):
-                        self.drives.append(Path(_temp[i]))
-               
-                self.selected_path = Path(self.get_nested_config('directory', 'selected_path'))
-
-
-        except json.decoder.JSONDecodeError as e:
-            print(f"\nJSONDecodeError - - -> ['configs'] Weren't loaded. {e}.\n")
-            
-
-
-    def get_config(self, key) -> Any:
-        return self.configs.get(key)
     
-    def get_nested_config(self, nested_key, key) -> Any:
-
-        nested_dict: Dict = self.get_config(nested_key)
-        return nested_dict.get(key)
-
-
     def update(self) -> None:
-        self.load_configs()
+        try:
+            with open(file=self.file, mode='r', encoding='utf-8') as json_file:
+
+                self.configs: Dict[str, Any] = json.load(json_file)
+
+        except json.decoder.JSONDecodeError as exc:
+            print(f"\nJSONDecodeError - - -> ['configs'] Weren't loaded. {exc}.\n")
+        
+        except Exception as exc:
+            print(f"Exception - - -> ['configs'] Weren't loaded. {exc}.\n")
 
 
+        # InterfaceHandler Configs
+        key = 'interface'
 
-     
-#    _____      _   _     
-#   |  __ \    | \ | |                     
-#   | |__) |___|  \| | __ _ _ __ ___       
-#   |  _  // _ \ . ` |/ _` | '_ ` _ \      
-#   | | \ \  __/ |\  | (_| | | | | | |     
-#   |_|  \_\___|_| \_|\__,_|_| |_| |_|     
-#            
+        self.input_msg: str = self.get_config(key=key, nested_key='input_message')
+
+        self.min_interface_size: int = self.get_config(key=key, nested_key='min_interface_size')
+        self.max_string_length: int = self.get_config(key=key, nested_key='max_string_length')
+
+        self.interface_symbols: Dict[str, str] = self.get_config(key=key, nested_key='interface_symbols')
+        self.delimiter: str = self.get_config(key=key, nested_key='delimiter')
+
+        self.headers_pos: List[str] = self.get_config(key=key, nested_key='headers_pos')
+        self.contents_pos: List[str] = self.get_config(key=key, nested_key='contents_pos')
+
+        _temp = self.get_config(key=key, nested_key='headers_func')
+        self.headers_func: Callable[[str], str] = getattr(str, _temp, None)
+
+        _temp = self.get_config(key=key, nested_key='contents_func')
+        self.contents_func: Callable[[str], str] = getattr(str, _temp, None)
+
+
+        # DirectoryHandler Configs
+        key='directory'
+
+        self.first_path_occurrence: bool = self.get_config(key=key, nested_key='first_path_occurrence')
+
+        self.num_of_processes: int = self.get_config(key=key, nested_key='num_of_processes')
+        self.max_path_results: int = self.get_config(key=key, nested_key='max_path_results')
+
+        _temp = self.get_config(key=key, nested_key='excluded_paths')
+        self.excluded_paths: List[Path] = [Path(p) for p in _temp] if _temp else []
+
+        _temp = self.get_config(key=key, nested_key='drives')
+        self.drives: List[Path] = [Path(d) for d in _temp] if _temp else []
+
+        self.selected_path: Path = Path(self.get_config(key=key, nested_key='selected_path'))
+
+
+        # Others Configs
+        key = 'utils'
+
+        self.welcome: List[str] = self.get_config(key=key, nested_key='welcome')
+
+
+    def get_config(self, key: str, nested_key: str) -> Union[Dict, Any]:
+
+        return self.configs.get(key, {}).get(nested_key, None)

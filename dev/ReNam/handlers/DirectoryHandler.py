@@ -28,6 +28,8 @@ class DirectoryHandler():
         self.paths: List[Path]
         self.selected_path: Path
 
+        self.max_path_results: int
+
         self.update()
 
 
@@ -41,11 +43,12 @@ class DirectoryHandler():
         self.excluded_paths = configs.excluded_paths
 
         self.selected_path = configs.selected_path
+        self.max_path_results = configs.max_path_results
 
         if not self.drives:
             self.drives = self.get_drives()
 
-        print("DRIVES = ", self.drives)
+
 
 
     @staticmethod
@@ -149,7 +152,7 @@ class DirectoryHandler():
 
                 break
         
-        return search_results
+        return search_results[0 : self.max_path_results + 1]
 
 
     def __search_drive(self, path: Path, drive: Path) -> Union[List[Path], None]:

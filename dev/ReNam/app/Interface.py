@@ -1,3 +1,5 @@
+import time
+
 from utils.generic_utils import categorize_contents
 from utils.input_utils import read_str
 
@@ -8,6 +10,10 @@ class Interface():
         from Main import Main
 
         self.app: Main = app
+        
+        for _ in self.app.configs.welcome:
+            print(_, end='')
+        time.sleep(2.50)
 
 
     def update(self) -> None:
@@ -22,14 +28,10 @@ class Interface():
         while True:
             print("\n")
 
-            self.app.interface_handler.display_msg_box(msg="ALOUUUUUUUUUUU", pos='left')
-
             HEADERS = ["OPTIONS", "MENU"]
-            CONTENTS = categorize_contents(
-                contents=["RENAM", "CONFIGS", "QUIT"]
-            )
+            CONTENTS = categorize_contents(contents=["RENAM", "CONFIGS", "QUIT"])
            
-            option = self.app.interface_handler.display_and_select(HEADERS, CONTENTS)
+            option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
             match int(option):
                 case 1:
@@ -51,7 +53,7 @@ class Interface():
                 contents=["SELECT DIRECTORY", "GO BACK", "QUIT"]
             )
 
-            option = self.app.interface_handler.display_and_select(HEADERS, CONTENTS)
+            option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
             match int(option):
 
@@ -79,17 +81,19 @@ class Interface():
                                 contents=str_search_list
                             )
 
-                        option = int(self.app.interface_handler.display_and_select(HEADERS, CONTENTS))
+                        option = int(self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS))
 
                         if option != -1:
                             dir = str_search_list[option - 1]
+
+                            print("FULL:", Path(dir).as_posix())
 
                             self.app.interface_handler.display_msg_box(msg = f"{dir}")
 
 
                     except Exception as e:
                         raise e
-                        print(f"EXCEPTION {e}")
+
 
 
                     
@@ -124,7 +128,7 @@ class Interface():
                 str(self.app.configs.input_msg).strip("\n"),
                 str(self.app.configs.min_interface_size), 
                 str(self.app.configs.max_string_length),
-                str(self.app.configs.string_delimiter),
+                str(self.app.configs.delimiter),
                 str(self.app.configs.headers_pos),
                 str(self.app.configs.contents_pos),
             ], 
@@ -139,7 +143,7 @@ class Interface():
         )
 
 
-        self.app.interface_handler.display_interface(HEADERS, CONTENTS)
+        self.app.interface_handler.display_interface(headers=HEADERS, contents=CONTENTS)
 
         self.menu()        
        
