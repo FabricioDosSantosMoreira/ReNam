@@ -30,7 +30,7 @@ class Interface():
             print("\n")
 
             HEADERS = ["OPTIONS", "MENU"]
-            CONTENTS = categorize_contents(contents=["RENAM", "CONFIGS", "QUIT"])
+            CONTENTS = categorize_contents(contents=["RENAME", "CONFIGS", "QUIT"])
            
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
@@ -38,9 +38,11 @@ class Interface():
                 case 1:
                     self.rename_menu()
 
+                    continue
                 case 2:
                     self.configs_menu()
 
+                    continue
                 case 3:
                     self.quit()
 
@@ -50,54 +52,19 @@ class Interface():
             print("\n")
 
             HEADERS = ["OPTIONS", "RENAME MENU"]
-            CONTENTS = categorize_contents(
-                contents=["SELECT DIRECTORY", "GO BACK", "QUIT"]
-            )
+            CONTENTS = categorize_contents(contents=["SELECT DIRECTORY", "GO BACK", "QUIT"])
 
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
             match int(option):
-
                 case 1: 
-                    from pathlib import Path
-                    _temp = read_str(msg="\nInsert full path or directory name: ")
-                    if _temp == -1:
-                        print("continue")
-                        continue
-                
-                    try:
-                        path = Path(_temp)
-                        search = self.app.directory_handler.search_drives(path=path)
-                        
-                        str_search_list = []
-                        for i in range(len(search)):
-                            print(str(search[i]))
-                            str_search_list.append(str(search[i]))
+                    dir = self.read_path()
 
-                        print(str_search_list, "\n\n\n")
-                        if str_search_list:
+                    if dir:
+                        self.app.directory_handler.selected_path = dir
+                        print(f"\n└─────────────> Selected [{dir}] as directory.\n")
 
-                            HEADERS = ["OPTIONS", "PATHS"]
-                            CONTENTS = categorize_contents(
-                                contents=str_search_list
-                            )
-
-                        option = int(self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS))
-
-                        if option != -1:
-                            dir = str_search_list[option - 1]
-
-                            print("FULL:", Path(dir).as_posix())
-
-                            self.app.interface_handler.display_msg_box(msg = f"{dir}")
-
-
-                    except Exception as e:
-                        raise e
-
-
-
-                    
+                    continue           
                 case 2:
                     self.menu()
 
@@ -105,17 +72,39 @@ class Interface():
                     self.quit()
 
         
+    def read_path(self):
+
+        _temp = read_str(msg="\nInsert full path or directory name: ")
+        if _temp == -1: # Exception from 'read_str()', return None
+            return None
+
+        print(f"\n└─────────────> Please wait while ['{_temp}'] is being searched...\n")
+        search = self.app.directory_handler.search_drives(path=_temp)
+
+        # If 'search' doesn't contain a path
+        if search is None:
+            print(f"\n└─────────────> The directory path [{_temp}] wasn't found.\n")
+            return None
         
+        # If 'search' only contains a single path
+        if len(search) == 1:               
+            return search[0]
 
 
+        search_as_str = []
+        for i in range(len(search)):
+            search_as_str.append(str(search[i]))
 
+        HEADERS = ["OPTIONS", "PATHS"]
+        CONTENTS = categorize_contents(contents=search_as_str)
 
-
-
-
-
-
-
+        option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
+        if option == -1: # Exception from 'read_str()', return None
+            return None
+        
+        return search[int(option) - 1]
+        
+    
 
 
     def configs_menu(self) -> None:
