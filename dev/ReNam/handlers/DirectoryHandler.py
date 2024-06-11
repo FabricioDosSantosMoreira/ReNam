@@ -1,12 +1,11 @@
 import os
+import scandir
+
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from multiprocessing.pool import ApplyResult, ThreadPool
 from pathlib import Path
 from typing import List, Union
-
-import scandir
-
 
 
 class DirectoryHandler():
@@ -19,17 +18,17 @@ class DirectoryHandler():
         self.app: Main = app
 
 
-        self._first_path_occurrence: bool
-        self._num_of_processes: int
+        self.first_path_occurrence: bool = None
 
-        self._drives: List[Path]
-        self._excluded_paths: List[Path]
+        self.num_of_processes: int = 0
+        self.max_path_results: int = 0
 
-        self.paths: List[Path]
-        self.selected_path: Path
+        self.excluded_paths: List[Path] = []
+        self.drives: List[Path] = []
+        
+        self.selected_path: Path = ""
 
-        self.max_path_results: int
-
+        
         self.update()
 
 
@@ -37,18 +36,17 @@ class DirectoryHandler():
         configs = self.app.configs
 
         self.first_path_occurrence = configs.first_path_occurrence
+
         self.num_of_processes = configs.num_of_processes
-
-        self.drives = configs.drives
-        self.excluded_paths = configs.excluded_paths
-
-        self.selected_path = configs.selected_path
         self.max_path_results = configs.max_path_results
 
+        self.excluded_paths = configs.excluded_paths
+        self.drives = configs.drives
+        
+        self.selected_path = configs.selected_path
+        
         if not self.drives:
             self.drives = self.get_drives()
-
-
 
 
     @staticmethod
@@ -187,38 +185,6 @@ class DirectoryHandler():
     @absolute_path_found.setter
     def absolute_path_found(self, value: bool) -> None:
         self.__absolute_path_found = value
-
-    @property
-    def first_path_occurrence(self) -> bool:
-        return self._first_path_occurrence
-
-    @first_path_occurrence.setter
-    def first_path_occurrence(self, value: bool) -> None:
-        self._first_path_occurrence = value
-
-    @property
-    def num_of_processes(self) -> int:
-        return self._num_of_processes
-
-    @num_of_processes.setter
-    def num_of_processes(self, value: int) -> None:
-        self._num_of_processes = value
-
-    @property
-    def drives(self) -> List[Path]:
-        return self._drives
-
-    @drives.setter
-    def drives(self, value: List[Path]) -> None:
-        self._drives = value
-
-    @property
-    def excluded_paths(self) -> List[Path]:
-        return self._excluded_paths
-
-    @excluded_paths.setter
-    def excluded_paths(self, value: List[Path]) -> None:
-        self._excluded_paths = value
 
 
 class GenericIterator(ABC):

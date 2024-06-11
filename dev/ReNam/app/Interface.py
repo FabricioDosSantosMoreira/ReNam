@@ -10,10 +10,11 @@ class Interface():
         from Main import Main
 
         self.app: Main = app
-        
+
         for _ in self.app.configs.welcome:
             print(_, end='')
         time.sleep(2.50)
+        print("\n\n\n")
 
 
     def update(self) -> None:
@@ -150,7 +151,6 @@ class Interface():
 
 
     
-
 
 
 
