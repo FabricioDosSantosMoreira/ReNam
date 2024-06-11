@@ -1,7 +1,8 @@
 import os
 import re
 
-from typing import Optional, Dict, List, Any
+from enum import Enum
+from typing import Optional, Dict, List, Any, Union
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -12,34 +13,95 @@ class Midia(ABC):
         from Main import Main
 
         self.app: Main = app
-        
-        self._name: str
 
-        self._file_formats: List[str]
-        self._regex_patterns: List[re.Pattern]
+        self._title: str = ""
 
+        self._file_extensions: List[Path] = []
+        self._regex_patterns: List[re.Pattern] = []
 
     @abstractmethod
     def rename():
         pass
 
+    @abstractmethod
+    def update():
+        pass
+
     @property
-    def name(self) -> str:
-        return self._name
+    def title(self) -> str:
+        return self._title
+
+    @title.setter
+    def title(self, value: str) -> None:
+        self._title = value
+
+    @property
+    def file_extensions(self) -> List[Path]:
+        return self._file_extensions
+
+    @file_extensions.setter
+    def file_extensions(self, value: Union[Path, List[Path]]) -> None:
+        if isinstance(value, list):
+            if all(isinstance(item, Path) for item in value):
+                self._file_extensions = value
+            else:
+                raise ValueError("All items in the list 'value' must be of type 'Path'")
+            
+        elif isinstance(value, Path):
+            self._file_extensions = [value]
+
+        else:
+            raise TypeError("Expected 'Path' or 'List[Path]'")
+
+    @property
+    def regex_patterns(self) -> List[re.Pattern]:
+        return self._regex_patterns
     
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
+    @regex_patterns.setter
+    def regex_patterns(self, value: Union[re.Pattern, List[re.Pattern]]) -> None:
+        if isinstance(value, list):
+            if all(isinstance(item, re.Pattern) for item in value):
+                self._regex_patterns = value
+            else:
+                raise ValueError("All items in the list 'value' must be of type 're.Pattern'")
+        
+        elif isinstance(value, re.Pattern):
+            self._regex_patterns = [value]
+
+        else:
+            raise TypeError("Expected 're.Pattern' or 'List[re.Pattern]'")
+
+    
+
+
+
+
+
+
+
+
+
+
 
 
 class Movie(Midia):
 
-    def __init__(self, name: str) -> None:
-        super().__init__(name=name)
+    def __init__(self, app) -> None:
+        super().__init__(app=app)
+
+
+    def update(self):
 
 
     def rename():
         print('ranaming movie')
+
+
+
+
+
+
+
 
 
 class Series(Midia):
@@ -97,8 +159,26 @@ class Series(Midia):
     
 
 
+class MidiaEnum(Enum):
+
+    MOVIE = ("Movie", Movie)
+    SERIES = ("Series", Series)
 
 
+    def get_instance_of(self, app, *args, **kwargs) -> Union[Movie, Series]:
+        _, cls = self.value
+        return cls(app, *args, **kwargs)
     
 
+    @classmethod
+    def list_all(cls) -> List[str]:
+        return list(map(lambda c: c.value[0], cls))
 
+
+    def __str__(self):
+        return f"{self.name} ({self.value})"
+
+
+    def __repr__(self):
+        return f"<MidiaEnum.{self.name}: {self.value}>"
+    

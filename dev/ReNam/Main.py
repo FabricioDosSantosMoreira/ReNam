@@ -2,23 +2,23 @@ from app.Interface import Interface
 from handlers.ConfigsHandler import ConfigHandler
 from handlers.InterfaceHandler import InterfaceHandler
 from handlers.DirectoryHandler import DirectoryHandler
-from handlers.MidiaHandler import Midia
+from handlers.MidiaHandler import MidiaEnum
 
 
 class Main():
 
     def __init__(self) -> None:
         self.is_running: bool = True
-        
+
         self.on_init()
+
         
-
     def on_init(self) -> None:
-
         # Handlers
         self.configs = ConfigHandler(self)
         self.interface_handler = InterfaceHandler(self)
         self.directory_handler = DirectoryHandler(self)
+        self.midia_handler = MidiaEnum
 
         # Interface
         self.interface = Interface(self)

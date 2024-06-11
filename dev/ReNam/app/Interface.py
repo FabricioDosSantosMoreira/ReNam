@@ -11,10 +11,10 @@ class Interface():
 
         self.app: Main = app
 
-        for _ in self.app.configs.welcome:
-            print(_, end='')
-        time.sleep(2.50)
-        print("\n\n\n")
+        # for _ in self.app.configs.welcome:
+        #     print(_, end='')
+        # time.sleep(2.50)
+        # print("\n\n\n")
 
 
     def update(self) -> None:
@@ -52,7 +52,7 @@ class Interface():
             print("\n")
 
             HEADERS = ["OPTIONS", "RENAME MENU"]
-            CONTENTS = categorize_contents(contents=["SELECT DIRECTORY", "GO BACK", "QUIT"])
+            CONTENTS = categorize_contents(contents=["SELECT DIRECTORY", "RENAME", "GO BACK", "QUIT"])
 
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
@@ -66,9 +66,13 @@ class Interface():
 
                     continue           
                 case 2:
+                    self.readings()
+                    
+                    continue
+                case 3:
                     self.menu()
 
-                case 3:
+                case 4:
                     self.quit()
 
         
@@ -104,7 +108,21 @@ class Interface():
         
         return search[int(option) - 1]
         
-    
+
+    def readings(self) -> None:
+
+        a = []
+        midias = self.app.midia_handler.list_all()
+        print(midias)
+        
+
+
+
+
+
+
+
+
 
 
     def configs_menu(self) -> None:
