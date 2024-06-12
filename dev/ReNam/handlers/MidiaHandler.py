@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import re
 
@@ -97,21 +98,25 @@ class Series(Midia):
 
         self.season: int
 
-        # Dict = {'key(episode_number)', item(episode_name)}
+        # Dict = {'key(episode_number)', item(episode_name)} da API
         self.episodes: Dict[int, str] = {}
     
 
     def extract_eps_order(files: List[Path], patterns: List[re.Pattern]) -> Dict[int, List[Path]]:
-        # Dict = ["key(episode_number)", "item(["1p.1-file1", "ep.1-file1"], [...])"]
+        # Dict = ["key(episode_number)", "item(["ep.1-file1", "ep.1-file2"], [...])"]
 
+        #episode_files: Dict[int, List[Path]] = defaultdict(list)
         file_order: dict[int, list[str]] = {}
         filtered_items = {}
+
+        
 
         for pattern in patterns:
             for file in files:
 
-                # re.search ask for str not Path
-                match = re.search(pattern=pattern, string=str(file))
+                # 're.search' asks for a 'str' not 'Path'
+                file = str(file) # Path.as_posix() doesn't work here
+                match = re.search(pattern=pattern, string=file)
 
                 # Talvez de para utilizar o fromkeys que define um valor padrao para cada key
 
