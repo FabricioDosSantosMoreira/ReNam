@@ -71,45 +71,34 @@ class Midia(ABC):
         else:
             raise TypeError("Expected 're.Pattern' or 'List[re.Pattern]'")
 
-    
-
-
-
-
-
-
-
-
-
-
-
 
 class Movie(Midia):
 
-    def __init__(self, app) -> None:
+    def __init__(self, app, title: str) -> None:
         super().__init__(app=app)
 
+        self.title = title
 
+    
     def update(self):
+        configs = self.app.configs
 
 
-    def rename():
-        print('ranaming movie')
-
-
-
-
-
-
-
+    def rename(self):
+        print("\n\n\nrenaming movie")
 
 
 class Series(Midia):
 
-    def __init__(self, name: str) -> None:
-        super().__init__(name=name)
+    def __init__(self, app, title: str) -> None:
+        super().__init__(app=app)
 
-        self._season: int
+        self.title = title
+
+        self.season: int
+
+        # Dict = {'key(episode_number)', item(episode_name)}
+        self.episodes: Dict[int, str] = {}
     
 
     def extract_eps_order(files: List[Path], patterns: List[re.Pattern]) -> Dict[int, List[Path]]:

@@ -145,12 +145,14 @@ class InterfaceHandler():
             # TODO: check which works
             # max_content_length = max(wcswidth(content[i]) for content in contents)
             max_content_length = max(self.__get_visual_width(string=content[i]) for content in contents)
+            header_length = self.__get_visual_width(string=headers[i]) 
+
 
             # Add the largest value to 'str_size'.
-            if max_content_length > len(headers[i]):
+            if max_content_length > header_length:
                 str_size += max_content_length
             else:
-                str_size += len(headers[i])
+                str_size += header_length 
 
             # If the value calculated in 'assign_distributed_list' isn't enough, change to 'str_size'.
             if distributed_str_sizes[i] < str_size:
@@ -162,10 +164,9 @@ class InterfaceHandler():
             sizes_sum = sum(distributed_str_sizes) - distributed_str_sizes[-1]
             if distributed_str_sizes[-1] > max_content_length:
                 distributed_str_sizes[-1] -= sizes_sum
-                #distributed_str_sizes[-1] = max_content_length + 9
 
             if distributed_str_sizes[-1] < max_content_length + len(headers[-1]):
-                distributed_str_sizes[-1] = max_content_length + len(headers[-1]) + 1 #- 8
+                distributed_str_sizes[-1] = max_content_length + len(headers[-1]) + 1 
 
 
         # Adjust the sizes in 'distributed_str_sizes' to ensure only even sizes, decreases by '1' if odd.
@@ -249,8 +250,13 @@ class InterfaceHandler():
             
             alignment = self.__get_alignment(alignments=headers_pos, index=i)
 
+            # FIXME: WTFF!????
             visual_width = self.__get_visual_width(string=header)
-            width = width_count[i] - visual_width
+            a = 0
+            if not visual_width == len(header):
+                a = wcswidth(header) - len(header)
+
+            width = width_count[i] - a #- visual_width
 
             built_headers += self.__format_string(
                                         string=header, 
@@ -283,8 +289,13 @@ class InterfaceHandler():
 
                 alignment = self.__get_alignment(alignments=contents_pos, index=w)
 
+                # FIXME: WTFF!????
                 visual_width = self.__get_visual_width(string=string)
-                width = width_count[w] - visual_width
+                a = 0
+                if not visual_width == len(string):
+                    a = wcswidth(string) - len(string)
+                    
+                width = width_count[w] - a #- visual_width
 
                 built_contents += self.__format_string(
                                             string=string,
@@ -342,10 +353,10 @@ class InterfaceHandler():
         """
 
         # Check if the string contains any non-ASCII characters.
-        if has_non_ascii(string):
-
+        non_ascii, i = has_non_ascii(string)
+        if non_ascii:
             # Calculate visual width using wcswidth and adjust for the length difference.
-            visual_width = wcswidth(string) - len(string)
+            visual_width = wcswidth(string) 
         else:
             # For ASCII strings, the visual width is simply the length of the string.
             visual_width = len(string)

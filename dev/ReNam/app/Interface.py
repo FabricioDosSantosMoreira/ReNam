@@ -128,7 +128,10 @@ class Interface():
     def configs_menu(self) -> None:
         print("\n")
 
-        print(self.app.configs)
+        #print(list(self.app.configs.configs))
+
+        print(list(self.app.configs.configs.values()))
+
 
         HEADERS = ["CONFIG", "VALUE"]
         CONTENTS = categorize_contents(

@@ -10,7 +10,7 @@
         "min_interface_size": 120,
         "max_string_length": 90,
 
-        "interface_symbols": {"mid": "┼", "line_a": "─", "line_b": "─", "div": "│"},
+        "interface_symbols": {"mid": "+", "line_a": "-", "line_b": "=", "div": "|"},
         "delimiter": "..",
 
         "headers_pos": ["left", "left"],
@@ -26,9 +26,7 @@
         "max_path_results": 30,
 
         "excluded_paths": ["D:/", "C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
-        "drives": [],
-
-        "selected_path": ""
+        "drives": ["C:/"]
     },
 
 

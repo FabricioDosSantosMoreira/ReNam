@@ -64,8 +64,6 @@ class ConfigHandler():
         _temp = self.get_config(key=key, nested_key='drives')
         self.drives: List[Path] = [Path(d) for d in _temp] if _temp else []
 
-        self.selected_path: Path = Path(self.get_config(key=key, nested_key='selected_path'))
-
 
         # Others Configs
         key = 'utils'

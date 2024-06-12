@@ -97,5 +97,5 @@ def has_non_ascii(string: str) -> Tuple[bool, int]:
         if ord(char) > 127:
             return True, i
         
-
+        
     return False, -1

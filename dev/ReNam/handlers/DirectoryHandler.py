@@ -43,8 +43,6 @@ class DirectoryHandler():
         self.excluded_paths = configs.excluded_paths
         self.drives = configs.drives
         
-        self.selected_path = configs.selected_path
-        
         if not self.drives:
             self.drives = self.get_drives()
 
