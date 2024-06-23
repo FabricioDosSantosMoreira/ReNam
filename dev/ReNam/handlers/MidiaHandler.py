@@ -75,10 +75,10 @@ class Midia(ABC):
 
 class Movie(Midia):
 
-    def __init__(self, app, title: str) -> None:
+    def __init__(self, app) -> None:
         super().__init__(app=app)
 
-        self.title = title
+        self.title = ""
 
     
     def update(self):
@@ -91,16 +91,19 @@ class Movie(Midia):
 
 class Series(Midia):
 
-    def __init__(self, app, title: str) -> None:
+    def __init__(self, app) -> None:
         super().__init__(app=app)
 
-        self.title = title
+        self.title = ""
 
         self.season: int
 
         # Dict = {'key(episode_number)', item(episode_name)} da API
         self.episodes: Dict[int, str] = {}
     
+
+    def update():
+        pass
 
     def extract_eps_order(files: List[Path], patterns: List[re.Pattern]) -> Dict[int, List[Path]]:
         # Dict = ["key(episode_number)", "item(["ep.1-file1", "ep.1-file2"], [...])"]
@@ -159,7 +162,7 @@ class MidiaEnum(Enum):
     SERIES = ("Series", Series)
 
 
-    def get_instance_of(self, app, *args, **kwargs) -> Union[Movie, Series]:
+    def get_instance(self, app, *args, **kwargs) -> Union[Movie, Series]:
         _, cls = self.value
         return cls(app, *args, **kwargs)
     

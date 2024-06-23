@@ -1,7 +1,8 @@
 import time
+from typing import Union
 
 from classes.Exceptions import APIFetcherException
-from handlers.MidiaHandler import MidiaEnum
+from handlers.MidiaHandler import MidiaEnum, Series
 from utils.generic_utils import categorize_contents
 from utils.input_utils import read_str
 
@@ -79,7 +80,8 @@ class Interface():
 
                     continue           
                 case 2:
-                    self.readings()
+                    midia = self.rename()
+
                     
                     continue
                 case 3:
@@ -122,7 +124,7 @@ class Interface():
         return search[int(option) - 1]
         
 
-    def readings(self) -> None:
+    def rename(self) -> None:
 
         MIDIAS = MidiaEnum.list_all()
 
@@ -133,49 +135,78 @@ class Interface():
         if option == -1: # Exception from 'read_str()', return None
             return None
         
-        midia = str(MIDIAS[int(option) - 1]).lower()
-        title = read_str(msg=f"\n└─────────────> Insert a {midia} title: ")
+        selected_midia = str(MIDIAS[int(option) - 1]).lower()
 
 
-        if midia == 'movie':
+        title = read_str(msg=f"\n└─────────────> Insert a {selected_midia} title: ")
+        if title == -1: # Exception from 'read_str()', return None
+            return None
 
+
+        if selected_midia == 'movie':
+            MidiaInstance = MidiaEnum.MOVIE.get_instance(self.app)
             results = self.app.api_fetcher.fetch_movies(title=title)
-            if not results:
-                return -1
+
+        else:
+            MidiaInstance = MidiaEnum.SERIES.get_instance(self.app)
+            results = self.app.api_fetcher.fetch_series(title=title)
+
+        if not results:
+            print("\n└─────────────> TMDB API search didn't find anything.")
+            return None
 
 
+        HEADERS = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
+        CONTENTS = categorize_contents(contents=results)
+
+        option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
+        if option == -1: # Exception from 'read_str()', return None
+            return None
+        
+        # 'results' = ['Content Id', 'Title', 'Release Date', 'TMDB Id']
+        # 'results[1]' Refers to the title
+        title: str = str(results[int(option) - 1][1])
+        # 'results[3]' Refers to the id
+        id: int = int(results[int(option) - 1][3])
+
+        MidiaInstance.title = title
 
 
-            HEADERS = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
-            CONTENTS = categorize_contents(contents=results)
+        if type(MidiaInstance) == Series:
 
+            # Seleciona o episode-group
+            groups = self.app.api_fetcher.fetch_series_episode_groups(series_id=id, title=title)
+
+            HEADERS = ["OPTIONS", "NAME", "EPISODE COUNT", "GROUP ID"]
+            CONTENTS = categorize_contents(contents=groups)
+
+            self.app.interface_handler.display_msg_box(msg="EPISODE GROUPS")
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
             if option == -1: # Exception from 'read_str()', return None
                 return None
             
+            # 'groups' = ['Content Id', 'Name', 'Episode Count', 'TMDB Ep. Group Id']
+            group_id = str(groups[int(option) - 1][3])
 
-            print(results[int(option) - 1])
+            seasons = self.app.api_fetcher.fetch_series_group(group_id=group_id, title=title)
 
+            #self.app.api_fetcher.fetch_seasons(series_id=id, seasons=seasons)
+            
 
-
-        else: 
-            pass
-
-
-
-
-
+        print(MidiaInstance.title)
+        print(MidiaInstance)
 
 
-
-        #     movie_instance = MidiaEnum.MOVIE.get_instance_of(self.app, title=title)
+    
 
 
 
-        # else: 
-        #     series_instance = MidiaEnum.SERIES.get_instance_of(self.app, title=title)
 
-     
+
+
+
+
+
 
 
 
@@ -189,7 +220,6 @@ class Interface():
     def configs_menu(self) -> None:
         print("\n")
 
-        #print(list(self.app.configs.configs))
 
         print(list(self.app.configs.configs.values()))
 

@@ -7,7 +7,7 @@ from classes.Exceptions import APIFetcherException
 
 class APIFetcher():
 
-    __BASE_URL: str = "https://api.themoviedb.org/3/search"
+    __BASE_URL: str = "https://api.themoviedb.org/3/"
 
     __current_page: int = 1
     __total_pages: int = 1
@@ -55,8 +55,8 @@ class APIFetcher():
         return params
     
 
-    def fetch_movies(self, title: str) -> Any:
-        endpoint: str = "movies"
+    def fetch_movies(self, title: str) -> List[Union[List[str], None]]:
+        endpoint: str = "search/movie"
 
 
         def fetch() -> Generator[List[str], None, None]:
@@ -96,14 +96,130 @@ class APIFetcher():
             except APIFetcherException as exc:
                 break
 
-            finally:
-                self.__reset()
 
-
+        self.__reset()
         return movies
-                
-                
+    
 
+    def fetch_series(self, title: str) -> List[Union[List[str], None]]:
+        endpoint: str = "search/tv"
+
+
+        def fetch() -> Generator[List[str], None, None]:
+            params = self.__make_params(query=title, page=self.current_page)
+
+            status_code, data = self.__make_request(endpoint=endpoint, params=params)
+            if status_code != 200:
+                raise APIFetcherException(
+                    message=f"RESPONSE STATUS CODE = {status_code}."
+                )
+            
+            elif data['total_results'] == 0:
+                raise APIFetcherException(
+                    message=f"QUERY DIDN'T FIND ANYTHING WITH THE NAME {title}."
+                )
+            
+
+            self.total_pages = data['total_pages']
+            
+            for result in data['results']:
+                info = [str(result['name']), str(result['first_air_date']), str(result['id'])]
+                yield info
+
+
+        series: List[List[str]] = []
+        while self.current_page <= self.total_pages:
+            try:
+                for s in fetch():
+                    series.append(s)
+                    if len(series) >= self.MAX_SEARCH:
+                        break  
+                else:
+                    self.current_page += 1
+                    continue  
+                break 
+        
+            except APIFetcherException as exc:
+                break
+
+
+        self.__reset()
+        return series
+
+
+    def fetch_series_episode_groups(self, series_id: int, title: str) -> List[List[str]]:
+        endpoint=f"tv/{series_id}/episode_groups"
+
+
+        def fetch() -> Generator[List[str], None, None]:
+            params={'api_key': self.API_KEY}
+
+            status_code, data = self.__make_request(endpoint=endpoint, params=params)
+            if status_code != 200:
+                raise APIFetcherException(
+                    message=f"RESPONSE STATUS CODE = {status_code}."
+                )
+            
+            elif len(data['results']) == 0:
+                raise APIFetcherException(
+                    message=f"QUERY DIDN'T FIND A EPISODE GROUP FOR {title}."
+                )
+            
+            for info in data['results']:
+                yield [str(info['name']), str(info['episode_count']), str(info['id'])]
+
+        
+        groups_info = []
+        try:
+            for group_info in fetch():
+                groups_info.append(group_info)
+
+        except APIFetcherException as exc:
+            pass 
+
+        return groups_info
+
+
+    def fetch_series_group(self, group_id: str, title: str) -> int:
+        endpoint: str = f"tv/episode_group/{group_id}"
+
+
+        def fetch() -> int:
+            params = {'api_key': self.API_KEY}
+            status_code, data = self.__make_request(endpoint=endpoint, params=params)
+
+            if status_code != 200:
+                raise APIFetcherException(
+                    message=f"RESPONSE STATUS CODE = {status_code}."
+                )
+
+            elif not data:
+                raise APIFetcherException(
+                    message=f"QUERY DIDN'T FIND ANYTHING WITH THE NAME {title}."
+                )
+
+            groups_count = data['group_count']
+            episodes_count = data['episode_count']
+            
+            for group in range(groups_count):
+                group_data =  data['groups'][group]
+
+
+
+                breakpoint()
+                #len(data['groups']['episodes'])
+
+       
+
+        seasons = fetch()
+        return seasons
+            
+
+
+
+
+
+   
 
             
     @property
