@@ -1,5 +1,7 @@
 import time
 
+from classes.Exceptions import APIFetcherException
+from handlers.MidiaHandler import MidiaEnum
 from utils.generic_utils import categorize_contents
 from utils.input_utils import read_str
 
@@ -50,6 +52,17 @@ class Interface():
     def rename_menu(self) -> None:
         while True:
             print("\n")
+            if self.app.directory_handler.selected_path:
+                self.app.interface_handler.display_msg_box(
+                    msg=f"SELECTED DIRECTORY: {self.app.directory_handler.selected_path}",
+                )
+                files = self.app.directory_handler.get_directory_files(
+                    path=self.app.directory_handler.selected_path
+                )
+
+                self.app.interface_handler.display_msg_box(
+                    msg=f"{len(files)} FILES FOUND"
+                )
 
             HEADERS = ["OPTIONS", "RENAME MENU"]
             CONTENTS = categorize_contents(contents=["SELECT DIRECTORY", "RENAME", "GO BACK", "QUIT"])
@@ -111,10 +124,58 @@ class Interface():
 
     def readings(self) -> None:
 
-        a = []
-        midias = self.app.midia_handler.list_all()
-        print(midias)
+        MIDIAS = MidiaEnum.list_all()
+
+        HEADERS = ["OPTIONS", "MIDIA TYPE"]
+        CONTENTS = categorize_contents(contents=MIDIAS)
+
+        option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
+        if option == -1: # Exception from 'read_str()', return None
+            return None
         
+        midia = str(MIDIAS[int(option) - 1]).lower()
+        title = read_str(msg=f"\n└─────────────> Insert a {midia} title: ")
+
+
+        if midia == 'movie':
+
+            results = self.app.api_fetcher.fetch_movies(title=title)
+            if not results:
+                return -1
+
+
+
+
+            HEADERS = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
+            CONTENTS = categorize_contents(contents=results)
+
+            option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
+            if option == -1: # Exception from 'read_str()', return None
+                return None
+            
+
+            print(results[int(option) - 1])
+
+
+
+        else: 
+            pass
+
+
+
+
+
+
+
+
+        #     movie_instance = MidiaEnum.MOVIE.get_instance_of(self.app, title=title)
+
+
+
+        # else: 
+        #     series_instance = MidiaEnum.SERIES.get_instance_of(self.app, title=title)
+
+     
 
 
 

@@ -8,7 +8,7 @@
         "input_message": "└─────────────> Insert an option: ",
 
         "min_interface_size": 120,
-        "max_string_length": 90,
+        "max_string_length": 60,
 
         "interface_symbols": {"mid": "+", "line_a": "-", "line_b": "=", "div": "|"},
         "delimiter": "..",

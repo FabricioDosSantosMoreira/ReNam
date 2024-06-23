@@ -20,7 +20,6 @@ def categorize_contents(
         List[List[str]]: A list of lists, where each inner list contains an identifier and the corresponding content.
                         The format is [[identifier1, content1], [identifier2, content2], ...].
     """
-
     # If 'identifiers' isn't provided.
     if not identifiers:
 
@@ -33,9 +32,15 @@ def categorize_contents(
     # Initialize an empty list to store the categorized contents.
     categorized_contents: List = []
     for i, content in enumerate(contents): 
+        
+        #TODO: nem me pergunta
+        if isinstance(content, list):
+            content.insert(0, identifiers[i])
+            categorized_contents.append(content)
 
-        # Append a list containing the identifier and the content.
-        categorized_contents.append([identifiers[i], str(content)])
+        else:
+            # Append a list containing the identifier and the content.
+            categorized_contents.append([identifiers[i], str(content)])
 
 
     return categorized_contents 

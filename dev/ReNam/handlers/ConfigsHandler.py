@@ -28,6 +28,11 @@ class ConfigHandler():
         except Exception as exc:
             print(f"Exception - - -> ['configs'] Weren't loaded. {exc}.\n")
 
+        # APIFetcher Configs
+        key = 'api'
+
+        self.api_key: str = self.get_config(key=key, nested_key='API_KEY')
+        self.max_search: str = self.get_config(key=key, nested_key='MAX_SEARCH')
 
         # InterfaceHandler Configs
         key = 'interface'

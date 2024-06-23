@@ -154,7 +154,7 @@ class Series(Midia):
 
 
 class MidiaEnum(Enum):
-
+    
     MOVIE = ("Movie", Movie)
     SERIES = ("Series", Series)
 

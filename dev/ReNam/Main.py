@@ -3,6 +3,7 @@ from handlers.ConfigsHandler import ConfigHandler
 from handlers.InterfaceHandler import InterfaceHandler
 from handlers.DirectoryHandler import DirectoryHandler
 from handlers.MidiaHandler import MidiaEnum
+from classes.APIFetcher import APIFetcher
 
 
 class Main():
@@ -19,6 +20,7 @@ class Main():
         self.interface_handler = InterfaceHandler(self)
         self.directory_handler = DirectoryHandler(self)
         self.midia_handler = MidiaEnum
+        self.api_fetcher = APIFetcher(self)
 
         # Interface
         self.interface = Interface(self)
@@ -40,6 +42,7 @@ class Main():
         self.configs.update()
         self.interface_handler.update()
         self.directory_handler.update()
+        self.api_fetcher.update()
         self.run()
 
 
