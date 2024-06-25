@@ -147,6 +147,83 @@ class APIFetcher():
         return series
 
 
+    def fetch_series_seasons(self, title: str, id: str):
+        endpoint: str = f"tv/{id}"
+
+        def fetch() -> Generator[List[str], None, None]:
+            params = {'api_key': self.API_KEY}
+
+            status_code, data = self.__make_request(endpoint=endpoint, params=params)
+            if status_code != 200:
+                raise APIFetcherException(
+                    message=f"RESPONSE STATUS CODE = {status_code}."
+                )
+            
+            elif not data:
+                raise APIFetcherException(
+                    message=f"QUERY DIDN'T FIND ANYTHING WITH THE NAME {title}."
+                )
+   
+            for season in data['seasons']:
+                info = [str(season['season_number']), str(season['name']), str(season['episode_count'])]
+                yield info
+
+
+        seasons: List[str] = []
+        for season in fetch():
+            seasons.append(season)
+
+
+        self.__reset()
+        return seasons
+  
+
+    def fetch_series_episodes(self, series_id: str, season_number: str):
+        endpoint: str = f"tv/{series_id}/season/{season_number}"
+
+
+        def fetch() -> Generator[List[str], None, None]:
+            params = {'api_key': self.API_KEY}
+
+            status_code, data = self.__make_request(endpoint=endpoint, params=params)
+            if status_code != 200:
+                raise APIFetcherException(
+                    message=f"RESPONSE STATUS CODE = {status_code}."
+                )
+            
+            elif not data:
+                raise APIFetcherException(
+                    message=f"QUERY DIDN'T FIND ANYTHING WITH THE ID {series_id}."
+                )
+   
+            for episode in data['episodes']:
+                info = [str(episode['name']), str(episode['episode_number']), str(episode['season_number'])]
+                yield info
+
+
+        episodes: List[str] = []
+        for episode in fetch():
+            episodes.append(episode)
+
+
+        self.__reset()
+        return episodes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # TODO: 
     def fetch_series_episode_groups(self, series_id: int, title: str) -> List[List[str]]:
         endpoint=f"tv/{series_id}/episode_groups"
 

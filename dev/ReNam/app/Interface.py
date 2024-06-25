@@ -174,23 +174,48 @@ class Interface():
 
         if type(MidiaInstance) == Series:
 
-            # Seleciona o episode-group
-            groups = self.app.api_fetcher.fetch_series_episode_groups(series_id=id, title=title)
+            seasons = self.app.api_fetcher.fetch_series_seasons(title=title, id=id)
 
-            HEADERS = ["OPTIONS", "NAME", "EPISODE COUNT", "GROUP ID"]
-            CONTENTS = categorize_contents(contents=groups)
+            self.app.interface_handler.display_msg_box(msg=f"{title.title()} SEASONS")
+            HEADERS = ["OPTIONS", "SEASON NUMBER", "SEASON NAME", "EPISODE COUNT"]
+            CONTENTS = categorize_contents(contents=seasons)
 
-            self.app.interface_handler.display_msg_box(msg="EPISODE GROUPS")
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
             if option == -1: # Exception from 'read_str()', return None
                 return None
+
+            # 'seasons' = ['Interface ID', 'Season Number', 'Season Name', 'Episode Count', 'TMDB Season Id']
+            season_number = str(seasons[int(option) - 1][1])
+
+            episodes = self.app.api_fetcher.fetch_series_episodes(series_id=id, season_number=season_number)
+            print(episodes)
             
-            # 'groups' = ['Content Id', 'Name', 'Episode Count', 'TMDB Ep. Group Id']
-            group_id = str(groups[int(option) - 1][3])
 
-            seasons = self.app.api_fetcher.fetch_series_group(group_id=group_id, title=title)
 
-            #self.app.api_fetcher.fetch_seasons(series_id=id, seasons=seasons)
+
+
+
+
+
+
+            #ANIMES
+            # # Seleciona o episode-group
+            # groups = self.app.api_fetcher.fetch_series_episode_groups(series_id=id, title=title)
+
+            # HEADERS = ["OPTIONS", "NAME", "EPISODE COUNT", "GROUP ID"]
+            # CONTENTS = categorize_contents(contents=groups)
+
+            # self.app.interface_handler.display_msg_box(msg="EPISODE GROUPS")
+            # option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
+            # if option == -1: # Exception from 'read_str()', return None
+            #     return None
+            
+            # # 'groups' = ['Content Id', 'Name', 'Episode Count', 'TMDB Ep. Group Id']
+            # group_id = str(groups[int(option) - 1][3])
+
+            # seasons = self.app.api_fetcher.fetch_series_group(group_id=group_id, title=title)
+
+            # #self.app.api_fetcher.fetch_seasons(series_id=id, seasons=seasons)
             
 
         print(MidiaInstance.title)
