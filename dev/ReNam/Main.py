@@ -43,7 +43,7 @@ class Main():
         self.interface_handler.update()
         self.directory_handler.update()
         self.api_fetcher.update()
-        self.run()
+        #self.run()
 
 
 if __name__ == '__main__':

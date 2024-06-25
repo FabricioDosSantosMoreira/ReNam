@@ -1,8 +1,9 @@
 import time
-from typing import Union
+from typing import List, Union
 
+from handlers.DirectoryHandler import DirectoryHandler
 from classes.Exceptions import APIFetcherException
-from handlers.MidiaHandler import MidiaEnum, Series
+from handlers.MidiaHandler import MidiaEnum, Movie, Series
 from utils.generic_utils import categorize_contents
 from utils.input_utils import read_str
 
@@ -33,7 +34,7 @@ class Interface():
             print("\n")
 
             HEADERS = ["OPTIONS", "MENU"]
-            CONTENTS = categorize_contents(contents=["RENAME", "CONFIGS", "QUIT"])
+            CONTENTS = categorize_contents(contents=["RENAME", "CONFIGS", "UPDATE", "QUIT"])
            
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
 
@@ -47,6 +48,10 @@ class Interface():
 
                     continue
                 case 3:
+                    self.update()
+
+                    continue
+                case 4:
                     self.quit()
 
 
@@ -80,9 +85,13 @@ class Interface():
 
                     continue           
                 case 2:
-                    midia = self.rename()
 
-                    
+                    if not self.app.directory_handler.selected_path:
+                        print("Please select a path first")
+
+                    else:
+                        self.rename()
+
                     continue
                 case 3:
                     self.menu()
@@ -165,11 +174,21 @@ class Interface():
         
         # 'results' = ['Content Id', 'Title', 'Release Date', 'TMDB Id']
         # 'results[1]' Refers to the title
+        info: List[str] = results[int(option) - 1]
         title: str = str(results[int(option) - 1][1])
         # 'results[3]' Refers to the id
         id: int = int(results[int(option) - 1][3])
 
         MidiaInstance.title = title
+
+        files = DirectoryHandler.get_directory_files(self.app.directory_handler.selected_path)
+        if type(MidiaInstance) == Movie:
+            MidiaInstance.rename(
+                files=files,
+                info=info
+                )
+
+
 
 
         if type(MidiaInstance) == Series:

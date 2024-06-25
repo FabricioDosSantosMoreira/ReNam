@@ -7,6 +7,8 @@ from typing import Optional, Dict, List, Any, Union
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from handlers.DirectoryHandler import DirectoryHandler
+
 
 class Midia(ABC):
 
@@ -17,7 +19,7 @@ class Midia(ABC):
 
         self._title: str = ""
 
-        self._file_extensions: List[Path] = []
+        self._file_extensions: List[str] = []
         self._regex_patterns: List[re.Pattern] = []
 
     @abstractmethod
@@ -37,22 +39,22 @@ class Midia(ABC):
         self._title = value
 
     @property
-    def file_extensions(self) -> List[Path]:
+    def file_extensions(self) -> List[str]:
         return self._file_extensions
 
     @file_extensions.setter
-    def file_extensions(self, value: Union[Path, List[Path]]) -> None:
+    def file_extensions(self, value: Union[str, List[str]]) -> None:
         if isinstance(value, list):
-            if all(isinstance(item, Path) for item in value):
+            if all(isinstance(item, str) for item in value):
                 self._file_extensions = value
             else:
-                raise ValueError("All items in the list 'value' must be of type 'Path'")
+                raise ValueError("All items in the list 'value' must be of type 'str'")
             
-        elif isinstance(value, Path):
+        elif isinstance(value, str):
             self._file_extensions = [value]
 
         else:
-            raise TypeError("Expected 'Path' or 'List[Path]'")
+            raise TypeError("Expected 'Path' or 'List[str]'")
 
     @property
     def regex_patterns(self) -> List[re.Pattern]:
@@ -80,13 +82,39 @@ class Movie(Midia):
 
         self.title = ""
 
+        self.update()
+
     
     def update(self):
         configs = self.app.configs
 
+        self.file_extensions = ['.mp4', '.mkv']
+        self.regex_patterns = [
+            re.compile("S(\\d+)E(\\d+)"),
+            re.compile("s(\\d+)\\.e(\\d+)"), 
+            re.compile("EP\\.(\\d+)")
+        ]
 
-    def rename(self):
+
+
+    def rename(self, files: List[Path], info: List[str]):
+
+        name: str = f"{info[1]} - {info[2]}"
+
+        breakpoint()
         print("\n\n\nrenaming movie")
+        files = DirectoryHandler.filter_files(files=files, formats=self.file_extensions)
+        breakpoint()
+        for i, file in enumerate(files):
+            os.rename(
+                src=file,
+                dst=f"{file.parent}/{name}.{file.suffix}"    
+            )
+
+
+
+
+
 
 
 class Series(Midia):
@@ -100,6 +128,9 @@ class Series(Midia):
 
         # Dict = {'key(episode_number)', item(episode_name)} da API
         self.episodes: Dict[int, str] = {}
+
+
+        self.update()
     
 
     def update():
@@ -151,9 +182,6 @@ class Series(Midia):
     def rename(start_from: int, end_at: int) -> None:
 
         pass
-
-
-    
 
 
 class MidiaEnum(Enum):
