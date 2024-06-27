@@ -1,10 +1,10 @@
-from app.interface.interface import Interface
-
 from app.classes.handlers.config_handler import ConfigHandler
 from app.classes.handlers.interface_handler import InterfaceHandler
 from app.classes.handlers.directory_handler import DirectoryHandler
 
 from app.classes.APIFetcher import APIFetcher
+
+from app.interface.interface import Interface
 
 
 class Main():

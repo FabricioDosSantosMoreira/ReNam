@@ -1,6 +1,5 @@
 import time
 from app.assets.utils.generics import categorize_contents
-from app.core import logic
 
 
 class Interface():
@@ -42,6 +41,8 @@ class Interface():
 
 
     def rename_menu(self) -> None:
+        from app.core import logic
+
         while True:
             print("\n", end='')
 
@@ -62,7 +63,7 @@ class Interface():
                 case 2:
                     path = self.app.directory_handler.selected_path
                     if path != None:
-                        logic.rename()
+                        logic.rename(app=self.app)
 
                     print(f"\n└─────────────> Please select a directory first.\n")
 
@@ -90,7 +91,7 @@ class Interface():
         
 
     def welcome(self) -> None:
-        message: str = self.app.configs.welcome
+        message: str = self.app.config_handler.welcome
 
         for line in message:
             print(line, end='')

@@ -86,7 +86,7 @@ class Movie(Midia):
 
     
     def update(self):
-        configs = self.app.configs
+        configs = self.app.config_handler
 
         self.file_extensions = ['.mp4', '.mkv']
         self.regex_patterns = [

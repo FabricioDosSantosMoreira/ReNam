@@ -33,7 +33,7 @@ class DirectoryHandler():
 
 
     def update(self) -> None:
-        configs = self.app.configs
+        configs = self.app.config_handler
 
         self.first_path_occurrence = configs.first_path_occurrence
 

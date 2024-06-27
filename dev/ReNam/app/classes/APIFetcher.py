@@ -25,7 +25,7 @@ class APIFetcher():
 
     
     def update(self) -> None:
-        configs = self.app.configs
+        configs = self.app.config_handler
 
         self.API_KEY = configs.api_key
         self.MAX_SEARCH = configs.max_search

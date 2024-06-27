@@ -31,7 +31,7 @@ class InterfaceHandler():
 
 
     def update(self) -> None:
-        configs = self.app.configs
+        configs = self.app.config_handler
 
         self.min_interface_size = configs.min_interface_size
         self.max_string_length = configs.max_string_length
