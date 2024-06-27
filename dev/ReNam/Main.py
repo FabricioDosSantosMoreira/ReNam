@@ -1,10 +1,10 @@
 from app.interface.interface import Interface
-from app.classes.APIFetcher import APIFetcher
 
 from app.classes.handlers.config_handler import ConfigHandler
 from app.classes.handlers.interface_handler import InterfaceHandler
 from app.classes.handlers.directory_handler import DirectoryHandler
-from app.classes.handlers.midia_handler import MidiaEnum
+
+from app.classes.APIFetcher import APIFetcher
 
 
 class Main():
@@ -16,14 +16,15 @@ class Main():
 
    
     def on_init(self) -> None:
-
-        self.configs = ConfigHandler(self)
+        # Handlers
+        self.config_handler = ConfigHandler(self)
         self.interface_handler = InterfaceHandler(self)
         self.directory_handler = DirectoryHandler(self)
-        self.midia_handler = MidiaEnum
+
+        # API Fetcher
         self.api_fetcher = APIFetcher(self)
 
-
+        # Interface
         self.interface = Interface(self)
         
 
@@ -40,7 +41,7 @@ class Main():
 
 
     def update(self) -> None:
-        self.configs.update()
+        self.config_handler.update()
         self.interface_handler.update()
         self.directory_handler.update()
         self.api_fetcher.update()

@@ -2,9 +2,9 @@ from typing import Callable, Optional, Tuple, Dict, List, Any
 from wcwidth import wcswidth
 import time
 
-from app.assets.utils.generic_utils import match_parity, evenly_assign_value_to_list
-from app.assets.utils.string_utils import has_non_ascii, reduce_string_length, reduce_strings_length
-from app.assets.utils.input_utils import read_int
+from app.assets.utils.generics import match_parity, evenly_assign_value_to_list
+from app.assets.utils.strings import has_non_ascii, reduce_string_length, reduce_strings_length
+from app.assets.utils.inputs import read_int
 
 
 class InterfaceHandler():

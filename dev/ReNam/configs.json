@@ -31,8 +31,6 @@
 
 
     "midia": {
-        "USE_NAME_FROM_API": false,
-
         "file_formats": [],
         "regex_patterns": ["S(\\d+)E(\\d+)", "s(\\d+)\\.e(\\d+)", "EP\\.(\\d+)"]
         

@@ -1,3 +1,5 @@
+# TODO: Change implementation and add more exceptions
+
 class BaseException(Exception):
 
     message: str = "BaseException"
