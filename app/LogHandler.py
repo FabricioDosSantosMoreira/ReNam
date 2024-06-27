@@ -10,7 +10,7 @@ def generate_rename_log(old_dirfiles: list[str], new_dirfiles: list[str], midia_
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(message)s')
 
-    log_path = ".\\app\\logs"
+    log_path = ".\\logs"
     
     try:
         if not os.path.exists(log_path):
