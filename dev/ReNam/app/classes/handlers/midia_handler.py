@@ -133,7 +133,7 @@ class Series(Midia):
         self.update()
     
 
-    def update():
+    def update(self):
         pass
 
     def extract_eps_order(files: List[Path], patterns: List[re.Pattern]) -> Dict[int, List[Path]]:

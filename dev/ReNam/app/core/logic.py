@@ -1,3 +1,4 @@
+from pathlib import Path
 from app.classes.handlers.directory_handler import DirectoryHandler
 
 from typing import List, Union

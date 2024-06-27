@@ -155,7 +155,7 @@ class DirectoryHandler():
 
 
     def __search_drive(self, path: Path, drive: Path) -> Union[List[Path], None]:
-
+        
         # Verify if 'path' is absolute, if 'path' exists and if 'path' is in the same drive as 'drive'
         if path.is_absolute() and path.exists() and path.anchor == drive.anchor:
             self.absolute_path_found = True

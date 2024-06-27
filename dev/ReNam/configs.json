@@ -25,8 +25,8 @@
         "num_of_processes": 100,
         "max_path_results": 30,
 
-        "excluded_paths": ["D:/", "C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
-        "drives": ["C:/"]
+        "excluded_paths": ["C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
+        "drives": []
     },
 
 
