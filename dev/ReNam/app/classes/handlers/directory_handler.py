@@ -112,9 +112,6 @@ class DirectoryHandler():
 
     def search_drives(self, path: Path) -> Union[List[Path], None]:
 
-        # TODO: fix 
-        path = Path(path)
-
         self.absolute_path_found = False
 
         thread_pool = ThreadPool(processes=self.num_of_processes)

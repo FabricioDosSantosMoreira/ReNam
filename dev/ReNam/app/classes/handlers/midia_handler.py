@@ -3,7 +3,7 @@ import os
 import re
 
 from enum import Enum
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, Dict, List, Any, Tuple, Union
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -96,25 +96,18 @@ class Movie(Midia):
         ]
 
 
-
     def rename(self, files: List[Path], info: List[str]):
 
         name: str = f"{info[1]} - {info[2]}"
 
-        breakpoint()
-        print("\n\n\nrenaming movie")
         files = DirectoryHandler.filter_files(files=files, formats=self.file_extensions)
-        breakpoint()
         for i, file in enumerate(files):
+            dst = Path(f"{file.parent}/{name}.{file.suffix}")
             os.rename(
                 src=file,
-                dst=f"{file.parent}/{name}.{file.suffix}"    
+                dst=dst    
             )
-
-
-
-
-
+            print(f"\nRenamed ['{file}'] to ['{dst}']")
 
 
 class Series(Midia):
@@ -134,16 +127,23 @@ class Series(Midia):
     
 
     def update(self):
-        pass
+        self.file_extensions = ['.mp4', '.mkv']
 
-    def extract_eps_order(files: List[Path], patterns: List[re.Pattern]) -> Dict[int, List[Path]]:
+        a = re.compile(pattern="S(\\d+)E(\\d+)")
+        b = re.compile(pattern="s(\\d+)\\.e(\\d+)")
+        c = re.compile(pattern="EP\\.(\\d+)")
+        d = re.compile(pattern="ep\\.(\\d+)")
+        e = re.compile(pattern="EP(\\d+)")
+        self.regex_patterns = [a,b,c,d,e]
+
+
+    def extract_eps_order(self, files: List[Path], patterns: List[re.Pattern]) -> Tuple[Dict[int, List[Path]], int]:
         # Dict = ["key(episode_number)", "item(["ep.1-file1", "ep.1-file2"], [...])"]
 
         #episode_files: Dict[int, List[Path]] = defaultdict(list)
         file_order: dict[int, list[str]] = {}
         filtered_items = {}
-
-        
+        total = 0
 
         for pattern in patterns:
             for file in files:
@@ -163,6 +163,7 @@ class Series(Midia):
                         while True: # Talvez n precise???
                             try:
                                 file_order[order].append(file)
+                                total += 1
                                 break
                             except KeyError:
                                 file_order[order]  = []
@@ -176,12 +177,75 @@ class Series(Midia):
             if file_order:
                 filtered_items = dict(sorted(file_order.items()))
 
-        return filtered_items 
-    
+        return filtered_items, total    
 
-    def rename(start_from: int, end_at: int) -> None:
+    def rename(self, files: List[Path], info: List[str]) -> None:
+        
+        root_path: Path = files[0].parent
+        files_name: List[str] = self.app.directory_handler.get_path_name(files)
 
-        pass
+
+        result, total_results = self.extract_eps_order(files=files_name, patterns=self.regex_patterns)
+        if total_results != len(files):
+            print(f"\n'extract_eps_order' dindn''t work.")
+            return None
+
+        episodes_info: List[str] = []
+        for i, episode in enumerate(info):
+            episodes_info.append(f"{episode[0]} S{episode[2]} EP{episode[1]}")
+        
+        episodes, total_results = self.extract_eps_order(files=episodes_info, patterns=[re.compile("EP(\\d+)")])
+        if total_results != len(episodes_info):
+            print(f"\n'extract_eps_order' dindn''t work.")
+            return None
+
+
+        new_names: List = []
+        for key in result.keys():
+            name = episodes.get(key, [])[0]
+            if name:
+                new_names.append(name)
+
+        episodes, total_results = self.extract_eps_order(files=new_names, patterns=[re.compile("EP(\\d+)")])
+        if total_results != len(episodes_info):
+            print(f"\n'extract_eps_order' dindn''t work.")
+            return None
+
+        if len(result) != len(episodes):
+            print(f"not enough correspondencies")
+            return None
+
+        for key, values in result.items():
+            for value in values:
+                old_name = self.app.directory_handler.get_path_name(paths=[value])[0]
+                suffix = self.app.directory_handler.get_path_suffix(paths=[old_name])[0]
+                new_name = f"{self.title} - {episodes.get(key, [])[0]}{suffix}"
+
+                old_path = Path(root_path / old_name)
+                new_path = Path(root_path / new_name)
+                if old_path.exists():
+                    os.rename(old_path, new_path)
+                    print(f"Renamed ['{old_name}'] to ['{new_name}']")
+                else:
+                    print(f"{old_path} does not exist")
+
+         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Anime(Midia):
+    pass
 
 
 class MidiaEnum(Enum):

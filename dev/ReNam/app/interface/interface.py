@@ -1,4 +1,5 @@
 import time
+
 from app.assets.utils.generics import categorize_contents
 
 
@@ -54,18 +55,21 @@ class Interface():
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
             match int(option):
                 case 1: 
-                    path = logic.read_path(app=self.app)
-                    if path != None:
-                        self.app.directory_handler.selected_path = path
-                        print(f"\n└─────────────> Selected [{path}] as directory.\n")
+                    paths = logic.read_path(app=self.app)
+                    if paths:
+                        path = logic.select_path(app=self.app, paths=paths)  
+                        if path:
+                            self.app.directory_handler.selected_path = path
+                            print(f"\n└─────────────> Selected [{path}] as directory.\n")
 
                     continue           
                 case 2:
-                    path = self.app.directory_handler.selected_path
-                    if path != None:
-                        logic.rename(app=self.app)
+                    selected_path = self.app.directory_handler.selected_path
+                    if not selected_path:
+                        print(f"\n└─────────────> Please select a directory first.\n")
+                        continue
 
-                    print(f"\n└─────────────> Please select a directory first.\n")
+                    logic.rename(app=self.app)
 
                     continue
                 case 3:
@@ -85,9 +89,10 @@ class Interface():
                 msg=f"SELECTED DIRECTORY: {path}",
             )
 
-            self.app.interface_handler.display_msg_box(
-                msg=f"{len(files)} FILES FOUND"
-            )
+            if files:
+                self.app.interface_handler.display_msg_box(
+                    msg=f"{len(files)} FILES FOUND"
+                )
         
 
     def welcome(self) -> None:
