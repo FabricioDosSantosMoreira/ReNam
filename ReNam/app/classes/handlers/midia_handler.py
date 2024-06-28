@@ -207,14 +207,20 @@ class Series(Midia):
                 new_names.append(name)
 
         episodes, total_results = self.extract_eps_order(files=new_names, patterns=[re.compile("EP(\\d+)")])
-        if total_results != len(episodes_info):
+        if total_results != len(result):
             print(f"\n'extract_eps_order' dindn''t work.")
             return None
+
 
         if len(result) != len(episodes):
             print(f"not enough correspondencies")
             return None
 
+
+        old_paths: List[Path] = []
+        new_paths: List[Path] = []
+        old_names: List[str] = []
+        new_names: List[str] = []
         for key, values in result.items():
             for value in values:
                 old_name = self.app.directory_handler.get_path_name(paths=[value])[0]
@@ -223,11 +229,31 @@ class Series(Midia):
 
                 old_path = Path(root_path / old_name)
                 new_path = Path(root_path / new_name)
-                if old_path.exists():
-                    os.rename(old_path, new_path)
-                    print(f"Renamed ['{old_name}'] to ['{new_name}']")
+
+                old_paths.append(old_path)
+                new_paths.append(new_path)
+                old_names.append(old_name)
+                new_names.append(new_name)
+
+        if len(old_paths) != len(new_paths):
+            print("Couldn't rename. Missing paths correspondencies")
+
+        interface = self.app.interface_handler
+
+        HEADERS = ["OLD FILE NAMES", "NEW FILES NAMES"]
+        CONTENTS = []
+        for i in range(len(old_paths)):
+            CONTENTS.append([old_names[i], new_names[i]])
+
+        interface.display_interface(headers=HEADERS, contents=CONTENTS)
+        value = input("press y to rename, else cancel: ")
+
+        if str(value).lower() == "y":
+            for i in range(len(old_paths)):
+                if old_paths[i].exists():
+                    os.rename(old_paths[i], new_paths[i])
                 else:
-                    print(f"{old_path} does not exist")
+                    print(f"{old_paths[i]} does not exist")
 
          
 
