@@ -10,33 +10,19 @@ from pathlib import Path
 from app.classes.handlers.directory_handler import DirectoryHandler
 
 
-class Midia(ABC):
+class BaseMidia(ABC):
+
+    _file_extensions: List[str] = []
+    _regex_patterns: List[re.Pattern] = []
 
     def __init__(self, app) -> None:
         from main import Main
 
         self.app: Main = app
 
-        self._title: str = ""
-
-        self._file_extensions: List[str] = []
-        self._regex_patterns: List[re.Pattern] = []
 
     @abstractmethod
-    def rename():
-        pass
-
-    @abstractmethod
-    def update():
-        pass
-
-    @property
-    def title(self) -> str:
-        return self._title
-
-    @title.setter
-    def title(self, value: str) -> None:
-        self._title = value
+    def update(self) -> None: ...
 
     @property
     def file_extensions(self) -> List[str]:
@@ -49,7 +35,7 @@ class Midia(ABC):
                 self._file_extensions = value
             else:
                 raise ValueError("All items in the list 'value' must be of type 'str'")
-            
+        
         elif isinstance(value, str):
             self._file_extensions = [value]
 
@@ -75,19 +61,21 @@ class Midia(ABC):
             raise TypeError("Expected 're.Pattern' or 'List[re.Pattern]'")
 
 
-class Movie(Midia):
+class Movie(BaseMidia):
 
     def __init__(self, app) -> None:
         super().__init__(app=app)
 
-        self.title = ""
+        self.title: str
+        self.launch_date: str
 
         self.update()
 
-    
-    def update(self):
+
+    def update(self) -> None:
         configs = self.app.config_handler
 
+        # TODO: fix me
         self.file_extensions = ['.mp4', '.mkv']
         self.regex_patterns = [
             re.compile("S(\\d+)E(\\d+)"),
@@ -96,48 +84,72 @@ class Movie(Midia):
         ]
 
 
-    def rename(self, files: List[Path], info: List[str]):
+class Series(BaseMidia):
 
-        name: str = f"{info[1]} - {info[2]}"
-
-        files = DirectoryHandler.filter_files(files=files, formats=self.file_extensions)
-        for i, file in enumerate(files):
-            dst = Path(f"{file.parent}/{name}.{file.suffix}")
-            os.rename(
-                src=file,
-                dst=dst    
-            )
-            print(f"\nRenamed ['{file}'] to ['{dst}']")
-
-
-class Series(Midia):
+    _title: str = ""
+    _season: str = ""
+    #Dict = {episode_number: episode_name}
+    _episodes: Dict[int, str] = {}
 
     def __init__(self, app) -> None:
         super().__init__(app=app)
 
-        self.title = ""
-
-        self.season: int
-
-        # Dict = {'key(episode_number)', item(episode_name)} da API
-        self.episodes: Dict[int, str] = {}
-
-
         self.update()
+
     
+    def update(self) -> None:
+        configs = self.app.config_handler
 
-    def update(self):
-        self.file_extensions = ['.mp4', '.mkv']
-
+        # TODO: fix me
+        self.file_extensions = ['.mp4', '.mkv', '.zip', '.srt']
         a = re.compile(pattern="S(\\d+)E(\\d+)")
         b = re.compile(pattern="s(\\d+)\\.e(\\d+)")
         c = re.compile(pattern="EP\\.(\\d+)")
         d = re.compile(pattern="ep\\.(\\d+)")
         e = re.compile(pattern="EP(\\d+)")
-        self.regex_patterns = [a,b,c,d,e]
+        f = re.compile(pattern="Ep.(\\d+)")
+        g = re.compile(pattern="S(\\d+) E(\\d+)")
+        g1 = re.compile(pattern="ep(\\d+)")
+        self.regex_patterns = [a,b,c,d,e, f, g, g1]
 
 
-    def extract_eps_order(self, files: List[Path], patterns: List[re.Pattern]) -> Tuple[Dict[int, List[Path]], int]:
+    @property
+    def title(self) -> str:
+        return self._title
+    
+    @title.setter
+    def title(self, title: str) -> None:
+        self._title = title
+
+    @property
+    def season(self) -> str:
+        return self._season
+    
+    @season.setter
+    def season(self, season: str) -> None:
+        if len(season) <= 1:
+            season = f"0{season}"
+        
+        self._season = season
+
+    @property
+    def episodes(self) -> Dict[int, str]:
+        return self._episodes
+    
+    @episodes.setter
+    def episodes(self, episodes: Dict[int, str]) -> None:
+        self._episodes = episodes
+
+
+    def extract_eps_order(
+            self, 
+            files: List[str], 
+            patterns: Optional[List[re.Pattern]] = None
+        ) -> Tuple[Dict[int, List[Path]], int]:
+
+        if patterns is None:
+            patterns = self.regex_patterns
+            
         # Dict = ["key(episode_number)", "item(["ep.1-file1", "ep.1-file2"], [...])"]
 
         #episode_files: Dict[int, List[Path]] = defaultdict(list)
@@ -179,120 +191,31 @@ class Series(Midia):
 
         return filtered_items, total    
 
-    def rename(self, files: List[Path], info: List[str]) -> None:
-        
-        root_path: Path = files[0].parent
-        files_name: List[str] = self.app.directory_handler.get_path_name(files)
+
+class Anime(BaseMidia):
+
+    def __init__(self, app) -> None:
+        super().__init__(app)
+
+        self.title = "title"
 
 
-        result, total_results = self.extract_eps_order(files=files_name, patterns=self.regex_patterns)
-        if total_results != len(files):
-            print(f"\n'extract_eps_order' dindn''t work.")
-            return None
-
-        episodes_info: List[str] = []
-        for i, episode in enumerate(info):
-            episodes_info.append(f"{episode[0]} S{episode[2]} EP{episode[1]}")
-        
-        episodes, total_results = self.extract_eps_order(files=episodes_info, patterns=[re.compile("EP(\\d+)")])
-        if total_results != len(episodes_info):
-            print(f"\n'extract_eps_order' dindn''t work.")
-            return None
-
-
-        new_names: List = []
-        for key in result.keys():
-            name = episodes.get(key, [])[0]
-            if name:
-                new_names.append(name)
-
-        episodes, total_results = self.extract_eps_order(files=new_names, patterns=[re.compile("EP(\\d+)")])
-        if total_results != len(result):
-            print(f"\n'extract_eps_order' dindn''t work.")
-            return None
-
-
-        if len(result) != len(episodes):
-            print(f"not enough correspondencies")
-            return None
-
-
-        old_paths: List[Path] = []
-        new_paths: List[Path] = []
-        old_names: List[str] = []
-        new_names: List[str] = []
-        for key, values in result.items():
-            for value in values:
-                old_name = self.app.directory_handler.get_path_name(paths=[value])[0]
-                suffix = self.app.directory_handler.get_path_suffix(paths=[old_name])[0]
-                new_name = f"{self.title} - {episodes.get(key, [])[0]}{suffix}"
-
-                old_path = Path(root_path / old_name)
-                new_path = Path(root_path / new_name)
-
-                old_paths.append(old_path)
-                new_paths.append(new_path)
-                old_names.append(old_name)
-                new_names.append(new_name)
-
-        if len(old_paths) != len(new_paths):
-            print("Couldn't rename. Missing paths correspondencies")
-
-        interface = self.app.interface_handler
-
-        HEADERS = ["OLD FILE NAMES", "NEW FILES NAMES"]
-        CONTENTS = []
-        for i in range(len(old_paths)):
-            CONTENTS.append([old_names[i], new_names[i]])
-
-        interface.display_interface(headers=HEADERS, contents=CONTENTS)
-        value = input("press y to rename, else cancel: ")
-
-        if str(value).lower() == "y":
-            for i in range(len(old_paths)):
-                if old_paths[i].exists():
-                    os.rename(old_paths[i], new_paths[i])
-                else:
-                    print(f"{old_paths[i]} does not exist")
-
-         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Anime(Midia):
-    pass
-
-
-class MidiaEnum(Enum):
+class MidiasEnum(Enum):
     
+    ANIME = ("Anime", Anime)
     MOVIE = ("Movie", Movie)
     SERIES = ("Series", Series)
-
-
-    def get_instance(self, app, *args, **kwargs) -> Union[Movie, Series]:
+    
+    def get_instance(self, app, *args, **kwargs) -> Union[Anime, Movie, Series]:
         _, cls = self.value
         return cls(app, *args, **kwargs)
     
-
     @classmethod
     def list_all(cls) -> List[str]:
         return list(map(lambda c: c.value[0], cls))
 
-
     def __str__(self):
         return f"{self.name} ({self.value})"
-
 
     def __repr__(self):
         return f"<MidiaEnum.{self.name}: {self.value}>"

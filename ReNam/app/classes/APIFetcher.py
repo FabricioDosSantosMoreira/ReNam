@@ -37,8 +37,8 @@ class APIFetcher():
 
 
     def __make_request(self, *, endpoint: str, params: dict) -> Tuple[int, Dict]:
-        url: str = f"{self.BASE_URL}/{endpoint}"
-        
+        url: str = f"{self.BASE_URL}{endpoint}"
+
         response: Response = requests.get(url=url, params=params)
 
         return response.status_code, response.json()

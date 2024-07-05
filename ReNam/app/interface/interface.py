@@ -55,12 +55,10 @@ class Interface():
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
             match int(option):
                 case 1: 
-                    paths = logic.read_path(app=self.app)
-                    if paths:
-                        path = logic.select_path(app=self.app, paths=paths)  
-                        if path:
-                            self.app.directory_handler.selected_path = path
-                            print(f"\n└─────────────> Selected [{path}] as directory.\n")
+                    path = logic.select_path(app=self.app)  
+                    if path:
+                        self.app.directory_handler.selected_path = path
+                        print(f"\n└─────────────> Selected [{path}] as directory.\n")
 
                     continue           
                 case 2:

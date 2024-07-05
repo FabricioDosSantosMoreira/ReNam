@@ -11,8 +11,7 @@ class ConfigHandler():
 
         self.app: Main = app
 
-        self.file = Path("./ReNam/configs.json")
-
+        self.file = Path(__file__).parent.parent.parent.parent / "configs.json"
 
         self.update()
 

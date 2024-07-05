@@ -1,6 +1,6 @@
 {
     "api": {
-        "API_KEY": "",
+        "API_KEY": "9fe9f6c1ca480d405dbef852a36b5fe2",
         "MAX_SEARCH": 15
     },
 
@@ -22,7 +22,7 @@
     "directory": {
         "first_path_occurrence": false,
 
-        "num_of_processes": 100,
+        "num_of_processes": 25,
         "max_path_results": 30,
 
         "excluded_paths": ["C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
