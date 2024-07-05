@@ -36,9 +36,6 @@ Follow these simple steps to utilize ReNam effectively:
 5. **Select Directory Path:**
    - Before initiating any renaming operations, ensure to select the directory path containing the files.
 
-6. **Customize File Formats and Patterns:**
-   - Feel free to customize the supported `file_formats` and `patterns` in `MidiaHandler.py` according to your preferences.
-
 
 **Note:** For any assistance or suggestions regarding ReNam, don't hesitate to reach out. Your feedback is highly appreciated!
 
