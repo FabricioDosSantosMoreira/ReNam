@@ -1,4 +1,4 @@
-# 🧾 ReNam
+# ReNam
 
 ReNam is a handy renaming tool designed for movies, series, and anime, utilizing TMDB.
 
