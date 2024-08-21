@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import re
+import copy
 from app.classes.handlers.interface_handler import InterfaceHandler
 from app.classes.handlers.directory_handler import DirectoryHandler
 from typing import List, Optional, Tuple, Union
@@ -71,120 +72,114 @@ def select_midia(app: Main) -> Union[str, None]:
     return midias[int(option) - 1].lower()
 
 
-def select_single_result(app: Main, results: List, headers: Optional[List[str]] = None) -> List[str]:
-    interface: InterfaceHandler = app.interface_handler
-
-    HEADERS = headers
-    if not headers:
-        HEADERS = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
-    CONTENTS = categorize_contents(contents=results)
-
-    option = interface.display_and_select(headers=HEADERS, contents=CONTENTS)
-    if option == -1: # Exception from 'read_str()', return None
-        return None
-    
-    # NOTE: ERRADO AGR 'results' = [['Content Id', 'Title', 'Release Date', 'TMDB Id'], ...] 
-    result = results[int(option) - 1]
-    
-    return result
-
-
 def rename(app: Main) -> None:
-    interface: InterfaceHandler = app.interface_handler
 
     midia = select_midia(app=app)
     if not midia:
         return None
     
-    title = read_str(msg=f"\n└─────────────> Insert a {midia} title: ")
-    if title == -1: # Exception from 'read_str()', return None
+    midia_title = read_str(msg=f"\n└─────────────> Insert a {midia} title: ")
+    if midia_title == -1: # Exception from 'read_str()'
         return None
     
-    if midia == "anime":
-        midia_instance = MidiasEnum.ANIME.get_instance(app=app)
-        # TODO: Implement Animes rename logic
-        # NOTE: Anime logic is more complex
 
-    elif midia == 'movie':
-        results = app.api_fetcher.fetch_movies(title=title)
-        if not results:
+    if midia ==  "movie":
+        movies_results = app.api_fetcher.fetch_movies(title=midia_title)
+        if not movies_results:
             print("\n└─────────────> 'APIFetcher' search didn't find anything.")
             return None
+        
+        headers = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
+        contents = categorize_contents(movies_results)
 
-        result = select_single_result(app=app, results=results)
-        rename_movie(app=app, result=result)
+        option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+        if option == -1: # Exception from 'display_and_select()'
+            return None
 
-    elif midia == 'series':
-        results = app.api_fetcher.fetch_series(title=title)
-        if not results:
+        # NOTE: movie_info = ['Title', 'Release Date', 'TMDB ID']
+        movie_info = movies_results[int(option) - 1] 
+
+        rename_movie(app=app, result=movie_info)
+
+
+    elif midia == "anime":
+        midia_instance = MidiasEnum.ANIME.get_instance(app=app)
+        #     # TODO: Implement Animes rename logic
+        #     # NOTE: Anime logic is more complex
+
+
+    elif midia == "series":
+        series_results = app.api_fetcher.fetch_series(title=midia_title)
+        if not series_results:
             print("\n└─────────────> 'APIFetcher' search didn't find anything.")
             return None
 
         headers = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
+        contents = categorize_contents(series_results)
 
-        # NOTE: result = ['Content ID', 'Title', 'Release Date', 'TMDB ID']
-        result = select_single_result(app=app, results=results, headers=headers)
-        if not result:
-            print("\n└─────────────> 'select_single_result' failed.")
-            return None
-
-        title = result[1]
-        id = result[3]
         
+        option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+        if option == -1: # Exception from 'display_and_select()'
+            return None
+        
+        # NOTE: series_info = ['Title', 'Release Date', 'TMDB ID']
+        series_info = series_results[int(option) - 1]
+        series_title = series_info[0]
+        series_id = series_info[2]
+        
+
         # TV Shows may or may not have episode groups
-        episode_groups_results = app.api_fetcher.fetch_series_episode_groups(series_id=id, title=title)
+        episode_groups_results = app.api_fetcher.fetch_series_episode_groups(series_id=series_id, title=series_title)
         if not episode_groups_results:
             option = 'DEFAULT GROUP'
-
         else:
             headers = ["OPTIONS", "NAME"]
-            contents = ["DEFAULT GROUP", "EPISODE GROUPS"]
-            contents = categorize_contents(contents=contents)
+            contents = categorize_contents(["DEFAULT GROUP", "EPISODE GROUPS"])
 
-            interface.display_msg_box(msg=f"{title.title()} POSSIBLE OPTIONS")
-            option = interface.display_and_select(headers=headers, contents=contents, index=1)
+            app.interface_handler.display_msg_box(msg=f"{series_title.title()} POSSIBLE OPTIONS")
+            option = app.interface_handler.display_and_select(headers=headers, contents=contents, index=1)
             if option == -1: # Exception from 'display_and_select()'
                 return None
             
 
         if option == "DEFAULT GROUP":
             
-            # NOTE: seasons = ['Season number', 'Season name', 'Episode count']
-            seasons = app.api_fetcher.fetch_series_seasons(title=title, id=id)
+            # NOTE: seasons = [['Season number', 'Season name', 'Episode count'], ... ]
+            seasons = app.api_fetcher.fetch_series_seasons(title=series_title, id=series_id)
 
             headers = ["OPTIONS", "SEASON NUMBER", "SEASON NAME", "EPISODE COUNT"]
-            contents = categorize_contents(contents=seasons.copy())
+            contents = categorize_contents(seasons)
 
-            interface.display_msg_box(msg=f"{title.title()} SEASONS")
-            option = interface.display_and_select(headers=headers, contents=contents)
-            if option == -1: # Exception from 'read_str()', return None
+            app.interface_handler.display_msg_box(msg=f"{series_title.title()} SEASONS")
+            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+            if option == -1: # Exception from 'display_and_select()'
                 return None
 
-            season_number = str(seasons[int(option) - 1][1])
-            season_episodes = app.api_fetcher.fetch_series_episodes(series_id=id, season_number=season_number)
+            season_number = str(seasons[int(option) - 1][0])
+            season_episodes = app.api_fetcher.fetch_series_episodes(series_id=series_id, season_number=season_number)
             
-
         elif option == "EPISODE GROUPS":
 
             headers = ["OPTIONS", "TITLE", "EPISODE COUNT", "ID"]
+            contents = categorize_contents(episode_groups_results)
 
-            # NOTE: result = ['Content ID', 'Title', 'Episode count', 'TMDB ID']
-            result = select_single_result(app=app, results=episode_groups_results, headers=headers)
-            if not result:
-                print("\n└─────────────> 'select_single_result()' failed.")
+            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+            if option == -1: # Exception from 'display_and_select()'
                 return None
 
-            group_id = result[3]
+            # NOTE: group_info = ['Title', 'Episode count', 'TMDB ID']
+            group_info = episode_groups_results[int(option) - 1]
+            group_id = group_info[2]
 
-            # group_info = [['name', 'episode_count', episodes['name', 'ep_number', 'season_number']], ... ]     
-            group_info = app.api_fetcher.fetch_series_group(group_id=group_id, title=title)
+            # NOTE: group_info = [['name', 'episode_count', episodes['name', 'ep_number', 'season_number']], ... ]     
+            group_info = app.api_fetcher.fetch_series_group(group_id=group_id, title=series_title)
 
             headers = ["OPTIONS", "TITLE", "EPISODE COUNT"]
             contents = categorize_contents(contents=[[info[0], info[1]] for info in group_info])
 
-            interface.display_msg_box(msg=f"{title.title()} GROUPS")
-            option = interface.display_and_select(headers=headers, contents=contents)
-            if option == -1: # Exception from 'read_str()', return None
+            app.interface_handler.display_msg_box(msg=f"{series_title.title()} GROUPS")
+            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+            if option == -1: # Exception from 'display_and_select()'
                 return None
             
             # NOTE: maybe?
@@ -192,13 +187,7 @@ def rename(app: Main) -> None:
             season_number = season_info[2][0][2]
             season_episodes = season_info[2]
 
-           
-        rename_series(app=app, title=title, season=season_number, episodes_info=season_episodes)
-
-
-
-
-
+        rename_series(app=app, title=series_title, season=season_number, episodes_info=season_episodes)
 
 
 def rename_movie(app: Main, result: List) -> None:

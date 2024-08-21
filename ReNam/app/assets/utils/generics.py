@@ -1,8 +1,9 @@
+import copy
+
 from typing import Optional, Literal, List
 
 
 def categorize_contents(
-        *,
         contents: List[str], 
         identifiers: Optional[List[str]] = None
 
@@ -20,6 +21,9 @@ def categorize_contents(
         List[List[str]]: A list of lists, where each inner list contains an identifier and the corresponding content.
                         The format is [[identifier1, content1], [identifier2, content2], ...].
     """
+    contents = copy.deepcopy(contents)
+    identifiers = copy.deepcopy(identifiers) if identifiers else None
+
     # If 'identifiers' isn't provided.
     if not identifiers:
 
@@ -42,8 +46,7 @@ def categorize_contents(
             # Append a list containing the identifier and the content.
             categorized_contents.append([identifiers[i], str(content)])
 
-
-    return categorized_contents 
+    return categorized_contents
 
 
 def match_parity(
