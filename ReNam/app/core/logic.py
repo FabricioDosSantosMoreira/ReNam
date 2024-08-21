@@ -11,73 +11,64 @@ from app.assets.utils.generics import categorize_contents
 from main import Main
 
 
-def read_path(app: Main) -> Union[List[Path], None]:
+def find_paths(app: Main) -> Union[List[Path], None]:
 
     value = read_str(msg="\nInsert full path or directory name: ")
-    if value == -1: # Exception from 'read_str()', return None
+    if value == -1: # Exception from 'read_str()'
         return None
     
     try:
-        temp_path: Path = Path(value)
+        path: Path = Path(value).resolve()
     except Exception as exc:
         print(f"\n└─────────────> Couldn't get a Path object out of ['{value}']\n")
         return None
     
-
-    print(f"\n└─────────────> Please wait while ['{temp_path}'] is being searched...\n")
-    search = app.directory_handler.search_drives(path=temp_path)
+    print(f"\n└─────────────> Please wait while ['{path}'] is being searched...\n")
+    search = app.directory_handler.search_drives(path=path)
     if search is None:
-        print(f"\n└─────────────> The directory path [{temp_path}] wasn't found.\n")
+        print(f"\n└─────────────> The directory path ['{path}'] wasn't found.\n")
         return None
     
-
     return search
     
 
 def select_path(app: Main, paths: Optional[List[Path]] = None) -> Union[Path, None]:
-    interface: InterfaceHandler = app.interface_handler
 
     if paths is None:
-        paths = read_path(app=app)
+        paths = find_paths(app=app)
 
     if len(paths) == 0 or paths is None:
-        print("\nPath wasn't found!")
         return None
 
     # If 'paths' contains a single path
     if len(paths) == 1:               
         return paths[0]
 
-
     paths_as_str: List[str] = []
     for i in range(len(paths)):
         paths_as_str.append(str(paths[i]))
 
+    headers = ["OPTIONS", "PATHS"]
+    contents = categorize_contents(contents=paths_as_str)
 
-    HEADERS = ["OPTIONS", "PATHS"]
-    CONTENTS = categorize_contents(contents=paths_as_str)
-
-    option = interface.display_and_select(headers=HEADERS, contents=CONTENTS)
-    if option == -1: # Exception from 'read_str()', return None
+    option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+    if option == -1: # Exception from 'display_and_select()'
         return None
 
     return paths[int(option) - 1]
     
 
 def select_midia(app: Main) -> Union[str, None]:
-    interface: InterfaceHandler = app.interface_handler
 
-    MIDIAS = MidiasEnum.list_all()
-    HEADERS = ["OPTIONS", "MIDIA TYPE"]
-    CONTENTS = categorize_contents(contents=MIDIAS)
+    midias = MidiasEnum.list_all()
+    headers = ["OPTIONS", "MIDIA TYPE"]
+    contents = categorize_contents(contents=midias)
 
-    option = interface.display_and_select(headers=HEADERS, contents=CONTENTS)
-    if option == -1: # Exception from 'read_str()', return None
+    option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+    if option == -1: # Exception from 'display_and_select()'
         return None
     
-    midia = str(MIDIAS[int(option) - 1]).lower()
-
-    return midia
+    return midias[int(option) - 1].lower()
 
 
 def select_single_result(app: Main, results: List, headers: Optional[List[str]] = None) -> List[str]:
@@ -329,23 +320,5 @@ def rename_series(app: Main, title: str, season: str, episodes_info: List) -> No
 
 
 def rename_anime() -> None:
-    raise NotImplementedError
+    raise NotImplementedError()
     
-#     # # Seleciona o episode-group
-#     # groups = app.api_fetcher.fetch_series_episode_groups(series_id=id, title=title)
-
-#     # HEADERS = ["OPTIONS", "NAME", "EPISODE COUNT", "GROUP ID"]
-#     # CONTENTS = categorize_contents(contents=groups)
-
-#     # app.interface_handler.display_msg_box(msg="EPISODE GROUPS")
-#     # option = app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
-#     # if option == -1: # Exception from 'read_str()', return None
-#     #     return None
-    
-#     # # 'groups' = ['Content Id', 'Name', 'Episode Count', 'TMDB Ep. Group Id']
-#     # group_id = str(groups[int(option) - 1][3])
-
-#     # seasons = app.api_fetcher.fetch_series_group(group_id=group_id, title=title)
-
-#     # #app.api_fetcher.fetch_seasons(series_id=id, seasons=seasons)
-#     pass
