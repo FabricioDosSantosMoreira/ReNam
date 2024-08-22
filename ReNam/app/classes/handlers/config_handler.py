@@ -76,7 +76,7 @@ class ConfigHandler:
         self.welcome: List[str] = self.get_config(key=key, nested_key='welcome')
 
 
-        # Anime Cofigs
+        # Midia Cofigs
         key = 'midia'
         self.extensions = self.get_config(key=key, nested_key='files_extensions')
         self.patterns = self.get_config(key=key, nested_key='regex_patterns')

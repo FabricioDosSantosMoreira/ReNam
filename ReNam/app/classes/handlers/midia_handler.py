@@ -75,13 +75,13 @@ class Movie(BaseMidia):
     def update(self) -> None:
         configs = self.app.config_handler
 
-        # TODO: fix me
-        self.files_extensions = ['.mp4', '.mkv']
-        self.regex_patterns = [
-            re.compile("S(\\d+)E(\\d+)"),
-            re.compile("s(\\d+)\\.e(\\d+)"), 
-            re.compile("EP\\.(\\d+)")
-        ]
+        self.files_extensions = configs.extensions
+        
+        re_patterns: List[re.Pattern] = []
+        for p in configs.patterns:
+            re_patterns.append(re.compile(pattern=p))
+
+        self.regex_patterns = re_patterns
 
 
 class Series(BaseMidia):
@@ -100,18 +100,14 @@ class Series(BaseMidia):
     def update(self) -> None:
         configs = self.app.config_handler
 
-        # TODO: fix me
-        self.files_extensions = ['.mp4', '.mkv', '.zip', '.srt']
-        a = re.compile(pattern="S(\\d+)E(\\d+)")
-        b = re.compile(pattern="s(\\d+)\\.e(\\d+)")
-        c = re.compile(pattern="EP\\.(\\d+)")
-        d = re.compile(pattern="ep\\.(\\d+)")
-        e = re.compile(pattern="EP(\\d+)")
-        f = re.compile(pattern="Ep.(\\d+)")
-        g = re.compile(pattern="S(\\d+) E(\\d+)")
-        g1 = re.compile(pattern="ep(\\d+)")
-        self.regex_patterns = [a,b,c,d,e, f, g, g1]
+        self.files_extensions = configs.extensions
+        
+        re_patterns: List[re.Pattern] = []
+        for p in configs.patterns:
+            re_patterns.append(re.compile(pattern=p))
 
+        self.regex_patterns = re_patterns
+       
 
     @property
     def title(self) -> str:
@@ -157,7 +153,13 @@ class Series(BaseMidia):
         filtered_items = {}
         total = 0
 
+        lock = False
         for pattern in patterns:
+            print(f"Using Pattern ['{pattern}']")
+            if lock:   
+                print(f"Due to lock=True pattern ['{pattern}] was skipped")
+                break 
+
             for file in files:
 
                 # 're.search' asks for a 'str' not 'Path'
@@ -165,7 +167,6 @@ class Series(BaseMidia):
                 match = re.search(pattern=pattern, string=file)
 
                 # Talvez de para utilizar o fromkeys que define um valor padrao para cada key
-
                 # ou o dict.get que não lança key error, mas retorna none ou um valor default
                 # Ex meu_dict.get("chave", valor_padrao_aq)
                 if match:
@@ -187,24 +188,19 @@ class Series(BaseMidia):
                         print("\nERROR - - -> ValueError.")
 
             if file_order:
+                lock = True if len(files) == len(file_order) else False 
                 filtered_items = dict(sorted(file_order.items()))
 
         return filtered_items, total    
 
 
-
-
 # TODO: fix class implementation to extend from BaseMidia
 class Anime():
-
-    
 
     def __init__(self, app) -> None:
         super().__init__(app)
 
         self.title: str
-
-
         self.update()
 
     
@@ -218,16 +214,6 @@ class Anime():
         for pattern in configs.patterns:
             pattern: re.Pattern = re.compile(pattern)
             self.regex_patterns.append(pattern)
-
-
-    
- 
-
-
-
-
-
-
 
 
 class MidiasEnum(Enum):

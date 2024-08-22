@@ -1,11 +1,9 @@
 import os
 from pathlib import Path
 import re
-import copy
 from app.classes.handlers.interface_handler import InterfaceHandler
 from app.classes.handlers.directory_handler import DirectoryHandler
 from typing import List, Optional, Tuple, Union
-from app.core.exceptions import APIFetcherException
 from app.classes.handlers.midia_handler import Anime, MidiasEnum, Movie, Series
 from app.assets.utils.inputs import read_str
 from app.assets.utils.generics import categorize_contents
@@ -72,6 +70,35 @@ def select_midia(app: Main) -> Union[str, None]:
     return midias[int(option) - 1].lower()
 
 
+def fetch_midia_results(app: Main, midia_type: str, midia_title: str):
+    results: List[List[str]] = None
+
+    if midia_type == 'movie': 
+        results = app.api_fetcher.fetch_movies(title=midia_title)
+
+    elif midia_type == 'series' or midia_type == 'anime':
+        results = app.api_fetcher.fetch_series(title=midia_title)
+
+    if not results:
+        print("\n└─────────────> 'APIFetcher' search didn't find anything.")
+        return None
+    
+    return results
+
+
+def choose_midia_result(app: Main, results: List[List[str]]):
+
+    headers = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
+    contents = categorize_contents(results)
+
+    option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+    if option == -1: # Exception from 'display_and_select()'
+        return None
+    
+    choosen_midia: List[str] = results[int(option) - 1] 
+    return choosen_midia
+    
+
 def rename(app: Main) -> None:
 
     midia = select_midia(app=app)
@@ -82,112 +109,99 @@ def rename(app: Main) -> None:
     if midia_title == -1: # Exception from 'read_str()'
         return None
     
-
-    if midia ==  "movie":
-        movies_results = app.api_fetcher.fetch_movies(title=midia_title)
-        if not movies_results:
-            print("\n└─────────────> 'APIFetcher' search didn't find anything.")
-            return None
-        
-        headers = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
-        contents = categorize_contents(movies_results)
-
-        option = app.interface_handler.display_and_select(headers=headers, contents=contents)
-        if option == -1: # Exception from 'display_and_select()'
-            return None
-
-        # NOTE: movie_info = ['Title', 'Release Date', 'TMDB ID']
-        movie_info = movies_results[int(option) - 1] 
-
-        rename_movie(app=app, result=movie_info)
+    # NOTE: results = [['Title', 'Release Date', 'TMDB ID'], ... ]
+    results = fetch_midia_results(app, midia.lower(), midia_title)
+    if not results:
+        return None
+    
+    # NOTE: choosen_midia = ['Title', 'Release Date', 'TMDB ID']
+    choosen_midia_info = choose_midia_result(app, results)
+    if not choosen_midia_info:
+        return None
 
 
-    elif midia == "anime":
-        midia_instance = MidiasEnum.ANIME.get_instance(app=app)
-        #     # TODO: Implement Animes rename logic
-        #     # NOTE: Anime logic is more complex
+    if midia ==  'movie':
+        rename_movie(app=app, result=choosen_midia_info)
 
+    elif midia == 'anime':
+        rename_tv_show(app=app, tv_show_info=choosen_midia_info)
 
     elif midia == "series":
-        series_results = app.api_fetcher.fetch_series(title=midia_title)
-        if not series_results:
-            print("\n└─────────────> 'APIFetcher' search didn't find anything.")
+        rename_tv_show(app=app, tv_show_info=choosen_midia_info)
+
+
+def rename_tv_show(app: Main, tv_show_info: List[str]):
+
+    # NOTE: tv_show_info = ['Title', 'Release Date', 'TMDB ID']
+    tv_show_title = tv_show_info[0]
+    tv_show_id = tv_show_info[2]
+    
+
+    # TV Shows may or may not have episode groups
+    episode_groups_results = app.api_fetcher.fetch_series_episode_groups(series_id=tv_show_id, title=tv_show_title)
+    if not episode_groups_results:
+        option = 'DEFAULT GROUP (recommended)'
+    else:
+        headers = ["OPTIONS", "NAME"]
+        contents = categorize_contents(["DEFAULT GROUP (recommended)", "EPISODE GROUPS (recommended for animes)"])
+
+        app.interface_handler.display_msg_box(msg="EPISODE GROUPS OPTIONS")
+        option = app.interface_handler.display_and_select(headers=headers, contents=contents, index=1)
+        if option == -1: # Exception from 'display_and_select()'
+            return None
+        
+
+    if option == "DEFAULT GROUP (recommended)":  
+        # NOTE: seasons = [['Season number', 'Season name', 'Episode count'], ... ]
+        seasons = app.api_fetcher.fetch_series_seasons(title=tv_show_title, id=tv_show_id)
+
+        headers = ["OPTIONS", "SEASON NUMBER", "SEASON NAME", "EPISODE COUNT"]
+        contents = categorize_contents(seasons)
+
+        app.interface_handler.display_msg_box(msg=f"{tv_show_title.title()} SEASONS")
+        option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+        if option == -1: # Exception from 'display_and_select()'
             return None
 
-        headers = ["OPTIONS", "TITLE", "RELEASE DATE", "ID"]
-        contents = categorize_contents(series_results)
-
+        season_number = str(seasons[int(option) - 1][0])
+        season_episodes = app.api_fetcher.fetch_series_episodes(series_id=tv_show_id, season_number=season_number)
         
+    elif option == "EPISODE GROUPS (recommended for animes)":
+
+        headers = ["OPTIONS", "TITLE", "EPISODE COUNT", "ID"]
+        contents = categorize_contents(episode_groups_results)
+
+        app.interface_handler.display_msg_box(msg=f"{tv_show_title.title()} EPISODE GROUPS OPTIONS")
+        option = app.interface_handler.display_and_select(headers=headers, contents=contents)
+        if option == -1: # Exception from 'display_and_select()'
+            return None
+
+        # NOTE: group_info = ['Title', 'Episode count', 'TMDB ID']
+        group_info = episode_groups_results[int(option) - 1]
+        group_id = group_info[2]
+
+        # NOTE: group_info = [['name', 'episode_count', episodes['name', 'ep_number', 'season_number']], ... ]     
+        group_info = app.api_fetcher.fetch_series_group(group_id=group_id, title=tv_show_title)
+
+        headers = ["OPTIONS", "TITLE", "EPISODE COUNT"]
+        contents = categorize_contents(contents=[[info[0], info[1]] for info in group_info])
+
+        app.interface_handler.display_msg_box(msg=f"{tv_show_title.title()} GROUPS")
         option = app.interface_handler.display_and_select(headers=headers, contents=contents)
         if option == -1: # Exception from 'display_and_select()'
             return None
         
-        # NOTE: series_info = ['Title', 'Release Date', 'TMDB ID']
-        series_info = series_results[int(option) - 1]
-        series_title = series_info[0]
-        series_id = series_info[2]
-        
-
-        # TV Shows may or may not have episode groups
-        episode_groups_results = app.api_fetcher.fetch_series_episode_groups(series_id=series_id, title=series_title)
-        if not episode_groups_results:
-            option = 'DEFAULT GROUP'
-        else:
-            headers = ["OPTIONS", "NAME"]
-            contents = categorize_contents(["DEFAULT GROUP", "EPISODE GROUPS"])
-
-            app.interface_handler.display_msg_box(msg=f"{series_title.title()} POSSIBLE OPTIONS")
-            option = app.interface_handler.display_and_select(headers=headers, contents=contents, index=1)
-            if option == -1: # Exception from 'display_and_select()'
-                return None
-            
-
-        if option == "DEFAULT GROUP":
-            
-            # NOTE: seasons = [['Season number', 'Season name', 'Episode count'], ... ]
-            seasons = app.api_fetcher.fetch_series_seasons(title=series_title, id=series_id)
-
-            headers = ["OPTIONS", "SEASON NUMBER", "SEASON NAME", "EPISODE COUNT"]
-            contents = categorize_contents(seasons)
-
-            app.interface_handler.display_msg_box(msg=f"{series_title.title()} SEASONS")
-            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
-            if option == -1: # Exception from 'display_and_select()'
-                return None
-
-            season_number = str(seasons[int(option) - 1][0])
-            season_episodes = app.api_fetcher.fetch_series_episodes(series_id=series_id, season_number=season_number)
-            
-        elif option == "EPISODE GROUPS":
-
-            headers = ["OPTIONS", "TITLE", "EPISODE COUNT", "ID"]
-            contents = categorize_contents(episode_groups_results)
-
-            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
-            if option == -1: # Exception from 'display_and_select()'
-                return None
-
-            # NOTE: group_info = ['Title', 'Episode count', 'TMDB ID']
-            group_info = episode_groups_results[int(option) - 1]
-            group_id = group_info[2]
-
-            # NOTE: group_info = [['name', 'episode_count', episodes['name', 'ep_number', 'season_number']], ... ]     
-            group_info = app.api_fetcher.fetch_series_group(group_id=group_id, title=series_title)
-
-            headers = ["OPTIONS", "TITLE", "EPISODE COUNT"]
-            contents = categorize_contents(contents=[[info[0], info[1]] for info in group_info])
-
-            app.interface_handler.display_msg_box(msg=f"{series_title.title()} GROUPS")
-            option = app.interface_handler.display_and_select(headers=headers, contents=contents)
-            if option == -1: # Exception from 'display_and_select()'
-                return None
-            
-            # NOTE: maybe?
+        # NOTE: IDK and IDC
+        try:
             season_info = group_info[int(option) - 1]
             season_number = season_info[2][0][2]
             season_episodes = season_info[2]
+        except Exception as exc:
+            print("\n└─────────────> missing info.")
+            return None
 
-        rename_series(app=app, title=series_title, season=season_number, episodes_info=season_episodes)
+    
+    __rename_tv_show(app=app, title=tv_show_title, season=season_number, episodes_info=season_episodes)
 
 
 def rename_movie(app: Main, result: List) -> None:
@@ -230,7 +244,7 @@ def rename_movie(app: Main, result: List) -> None:
         print("ERROR. No files to rename")
 
         
-def rename_series(app: Main, title: str, season: str, episodes_info: List) -> None:
+def __rename_tv_show(app: Main, title: str, season: str, episodes_info: List) -> None:
     interface: InterfaceHandler = app.interface_handler
 
     root_path: Path = app.directory_handler.selected_path
@@ -275,23 +289,32 @@ def rename_series(app: Main, title: str, season: str, episodes_info: List) -> No
    
     old_paths: List[Path] = []
     new_paths: List[Path] = []
+
     for key, values in ordered_files.items():
-        name = series.episodes.get(key, None)[0]
-        if name is None:
+        
+        missing = False
+        name = series.episodes.get(key, ['missing ep'])[0]
+        if name == 'missing ep':
+            missing = True
             print("Missing episode name")
 
         name = series.title + " " + name
         name = re.sub(r'[<>:"/\\|?*]', '', name)
 
-
         for value in values:
-            old_paths.append(Path(root_path / value))
-            new_paths.append(Path(root_path / (name + DirectoryHandler.get_path_suffix(paths=[value])[0])))
+
+            # If missing ep keep file name
+            if missing:
+                old_paths.append(Path(root_path / value))
+                new_paths.append(Path(root_path / value))
+            else:
+                old_paths.append(Path(root_path / value))
+                new_paths.append(Path(root_path / (name + DirectoryHandler.get_path_suffix(paths=[value])[0])))
 
 
     if len(old_paths) != len(new_paths):
         print("Couldn't rename. Missing paths correspondencies")
-
+    
     HEADERS = ["OLD FILE NAMES", "NEW FILES NAMES"]
     CONTENTS = []
     for i in range(len(old_paths)):
@@ -306,8 +329,3 @@ def rename_series(app: Main, title: str, season: str, episodes_info: List) -> No
                 os.rename(old_paths[i], new_paths[i])
             else:
                 print(f"{old_paths[i]} does not exist")
-
-
-def rename_anime() -> None:
-    raise NotImplementedError()
-    

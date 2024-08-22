@@ -8,7 +8,7 @@
         "input_message": "└─────────────> Insert an option: ",
 
         "min_interface_size": 120,
-        "max_string_length": 60,
+        "max_string_length": 40,
 
         "interface_symbols": {"mid": "+", "line_a": "-", "line_b": "=", "div": "|"},
         "delimiter": "..",
@@ -30,14 +30,16 @@
     },
 
     "midia": {
-        "files_extensions": [".mp4", ".mkv", ".zip", ".srt"],
+        "files_extensions": [".mp4", ".mkv", ".zip", ".srt", ".txt"],
         "regex_patterns": [
             "S(\\d+)E(\\d+)", 
             "s(\\d+)e(\\d+)", 
-            "EP.(\\d+)", "ep.(\\d+)", 
-            "EP(\\d+)", "ep(\\d+)", 
+            "EP(\\d+)",
+            "ep(\\d+)", 
             "S(\\d+) E(\\d+)", 
-            "s(\\d+) e(\\d+)"
+            "s(\\d+) e(\\d+)",
+            "ep.(\\d+)",     
+            "EP.(\\d+)"
         ]    
     },
 
