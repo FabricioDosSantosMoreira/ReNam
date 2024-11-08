@@ -8,7 +8,7 @@
         "input_message": "└─────────────> Insert an option: ",
 
         "min_interface_size": 120,
-        "max_string_length": 40,
+        "max_string_length": 55,
 
         "interface_symbols": {"mid": "+", "line_a": "-", "line_b": "=", "div": "|"},
         "delimiter": "..",
@@ -34,6 +34,7 @@
         "regex_patterns": [
             "S(\\d+)E(\\d+)", 
             "s(\\d+)e(\\d+)", 
+            "episode-(\\d+)",
             "EP(\\d+)",
             "ep(\\d+)", 
             "S(\\d+) E(\\d+)", 
@@ -46,5 +47,4 @@
     "utils": {
         "welcome": ["\n\n\n\n\n _____      _   _", "\n|  __ \\    | \\ | |", "\n| |__) |___|  \\| | __ _ _ __ ___", "\n|  _  // _ \\ . ` |/ _` | '_ ` _ \\", "\n| | \\ \\  __/ |\\  | (_| | | | | | |", "\n|_|  \\_\\___|_| \\_|\\__,_|_| |_| |_|"]   
     }
-    
 }

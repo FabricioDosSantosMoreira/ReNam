@@ -74,7 +74,7 @@ class InterfaceHandler():
                         width_count=width_count, 
                         symbols=self.interface_symbols,
                         func=func
-                    )
+        )
 
 
         print(border)

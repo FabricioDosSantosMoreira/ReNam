@@ -17,7 +17,7 @@ def find_paths(app: Main) -> Union[List[Path], None]:
         return None
     
     try:
-        path: Path = Path(value).resolve()
+        path: Path = Path(value)
     except Exception as exc:
         print(f"\n└─────────────> Couldn't get a Path object out of ['{value}']\n")
         return None
@@ -212,9 +212,9 @@ def rename_movie(app: Main, result: List) -> None:
     files = DirectoryHandler.filter_files(files=files, formats=movie.files_extensions)
 
     if files:
-        # NOTE: 'result' = ['Content Id', 'Title', 'Release Date', 'TMDB Id']
-        movie.title = result[1]
-        movie.launch_date = result[2]
+        # NOTE: 'result' = ['Title', 'Release Date', 'TMDB Id']
+        movie.title = result[0]
+        movie.launch_date = result[1]
         
         name: str = f"{movie.title} - {movie.launch_date}"
         name = re.sub(r'[<>:"/\\|?*]', '', name)
@@ -247,6 +247,8 @@ def rename_movie(app: Main, result: List) -> None:
 def __rename_tv_show(app: Main, title: str, season: str, episodes_info: List) -> None:
     interface: InterfaceHandler = app.interface_handler
 
+    print(episodes_info)
+
     root_path: Path = app.directory_handler.selected_path
 
     series = MidiasEnum.SERIES.get_instance(app=app)
@@ -271,10 +273,9 @@ def __rename_tv_show(app: Main, title: str, season: str, episodes_info: List) ->
         else: 
             ep_num = episodes_info[i][1]
             
-        ep_name = re.sub(r'[<>:"/\\|?*]', '', episodes_info[i][0])
+        ep_name = re.sub(r'[<>:"/\\|?*]', ' ', episodes_info[i][0])
 
         episodes.append(f"S{series.season}E{ep_num} - {ep_name}")
-
 
     ordered_episodes, total_results = series.extract_eps_order(files=episodes)
     if total_results != len(episodes): # ordered_files
@@ -291,7 +292,7 @@ def __rename_tv_show(app: Main, title: str, season: str, episodes_info: List) ->
     new_paths: List[Path] = []
 
     for key, values in ordered_files.items():
-        
+
         missing = False
         name = series.episodes.get(key, ['missing ep'])[0]
         if name == 'missing ep':
@@ -310,7 +311,6 @@ def __rename_tv_show(app: Main, title: str, season: str, episodes_info: List) ->
             else:
                 old_paths.append(Path(root_path / value))
                 new_paths.append(Path(root_path / (name + DirectoryHandler.get_path_suffix(paths=[value])[0])))
-
 
     if len(old_paths) != len(new_paths):
         print("Couldn't rename. Missing paths correspondencies")
