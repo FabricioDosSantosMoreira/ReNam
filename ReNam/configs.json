@@ -1,0 +1,50 @@
+{
+    "api": {
+        "API_KEY": "",
+        "MAX_SEARCH": 15
+    },
+
+    "interface": {
+        "input_message": "└─────────────> Insert an option: ",
+
+        "min_interface_size": 120,
+        "max_string_length": 55,
+
+        "interface_symbols": {"mid": "+", "line_a": "-", "line_b": "=", "div": "|"},
+        "delimiter": "..",
+
+        "headers_pos": ["left", "left"],
+        "contents_pos": ["left", "left"],
+        "headers_func": "upper",
+        "contents_func": "title"
+    },
+
+    "directory": {
+        "first_path_occurrence": false,
+
+        "num_of_processes": 25,
+        "max_path_results": 30,
+
+        "excluded_paths": ["C:/MinGW", "C:/CUE5", "C:/XboxGames", "C:/Intel"],
+        "drives": []
+    },
+
+    "midia": {
+        "files_extensions": [".mp4", ".mkv", ".zip", ".srt", ".txt"],
+        "regex_patterns": [
+            "S(\\d+)E(\\d+)", 
+            "s(\\d+)e(\\d+)", 
+            "episode-(\\d+)",
+            "EP(\\d+)",
+            "ep(\\d+)", 
+            "S(\\d+) E(\\d+)", 
+            "s(\\d+) e(\\d+)",
+            "ep.(\\d+)",     
+            "EP.(\\d+)"
+        ]    
+    },
+
+    "utils": {
+        "welcome": ["\n\n\n\n\n _____      _   _", "\n|  __ \\    | \\ | |", "\n| |__) |___|  \\| | __ _ _ __ ___", "\n|  _  // _ \\ . ` |/ _` | '_ ` _ \\", "\n| | \\ \\  __/ |\\  | (_| | | | | | |", "\n|_|  \\_\\___|_| \\_|\\__,_|_| |_| |_|"]   
+    }
+}
