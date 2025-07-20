@@ -30,10 +30,13 @@
     },
 
     "midia": {
-        "files_extensions": [".mp4", ".mkv", ".zip", ".srt", ".txt"],
+        "files_extensions": [".mp4", ".mkv", ".zip", ".srt"],
         "regex_patterns": [
+            "-_(\\d+)", 
+            "- (\\d+)", 
             "S(\\d+)E(\\d+)", 
             "s(\\d+)e(\\d+)", 
+            "Episode.(\\d+)",
             "episode-(\\d+)",
             "EP(\\d+)",
             "ep(\\d+)", 

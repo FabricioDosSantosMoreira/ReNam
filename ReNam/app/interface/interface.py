@@ -50,7 +50,14 @@ class Interface():
             self.show_dir_info()
             
             HEADERS = ["OPTIONS", "RENAME MENU"]
-            CONTENTS = categorize_contents(contents=["SELECT DIRECTORY", "RENAME FILES", "GO BACK", "QUIT"])
+            CONTENTS = categorize_contents(contents=[
+                    "SELECT DIRECTORY", 
+                    "RENAME FILES", 
+                    "RENAME FILE", 
+                    "RENAME FILES ENUMERATION",
+                    "GO BACK", 
+                    "QUIT"
+                ])
 
             option = self.app.interface_handler.display_and_select(headers=HEADERS, contents=CONTENTS)
             match int(option):
@@ -62,19 +69,21 @@ class Interface():
 
                     continue           
                 case 2:
-                    # TODO
-                    # selected_path = self.app.directory_handler.selected_path
-                    # if not selected_path:
-                    #     print(f"\n└─────────────> Please select a directory first.\n")
-                    #     continue
-
                     logic.rename(app=self.app)
 
                     continue
                 case 3:
+                    logic.rename_single_file(self.app)
+
+                    continue
+                case 4:
+                    logic.rename_file_numeration(self.app)
+
+                    continue
+                case 5:
                     self.menu()
 
-                case 4:
+                case 6:
                     self.quit()
 
     
